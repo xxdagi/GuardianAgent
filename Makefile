@@ -1,4 +1,4 @@
-.PHONY: setup up test test-backend test-bff test-frontend lint
+.PHONY: setup up dev test test-backend test-bff test-frontend lint sms
 
 # First-time setup: env files + dependencies for all services.
 setup:
@@ -11,6 +11,15 @@ setup:
 
 up:
 	docker compose up --build
+
+# Run all 3 services locally in parallel with live reload in one terminal (instant start, no Docker overhead)
+dev:
+	@echo "Starting backend, bff, and frontend..."
+	@(trap 'kill 0' SIGINT; \
+	  (cd backend && . .venv/bin/activate && uvicorn app.main:app --port 8000 --reload) & \
+	  (cd bff && npm run dev) & \
+	  (cd frontend && npm run dev) & \
+	  wait)
 
 test: test-backend test-bff test-frontend
 
