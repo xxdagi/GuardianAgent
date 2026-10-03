@@ -63,7 +63,7 @@ export function useEmergencyCall({
     contactPhone: contact.phone || "+48000000000",
     alertPhrases: keywords.length > 0 ? keywords : ["czy nakarmiłaś kota"],
     emergencyPhrases: ["zadzwoń do dziadka", "call grandpa"],
-    emergencyNumber: contact.phone || "112",
+    emergencyNumber: contact.phone || "",
   };
 
   // C4 Safety Pipeline is the sole source of truth for keyword detection and alert dispatch
@@ -111,8 +111,8 @@ export function useEmergencyCall({
         : contact.phone ||
           contact.name ||
           (language === "pl"
-            ? "Zaufany kontakt / 112"
-            : "Trusted Contact / 112");
+            ? "Zaufany kontakt"
+            : "Trusted Contact");
 
     let lat = coords?.latitude ?? 0;
     let lng = coords?.longitude ?? 0;
@@ -133,10 +133,17 @@ export function useEmergencyCall({
       lng,
     });
 
-    // Only speak local deterrent if ElevenLabs is not connected (ElevenLabs agent handles its own response)
-    if (!elevenLabsService.getIsConnected()) {
-      speechService.speak(selectedScenario.deterrentResponse);
+    // Haptic vibration feedback on caller's phone
+    if (typeof navigator !== "undefined" && "vibrate" in navigator) {
+      try {
+        navigator.vibrate([200, 100, 200]);
+      } catch {
+        // Ignore vibration errors
+      }
     }
+
+    // Speak deterrent response so caller gets verbal confirmation and camouflage
+    speechService.speak(selectedScenario.deterrentResponse);
   }, [lastAlert, contact, coords, language, selectedScenario.deterrentResponse]);
 
   // Schedule call with countdown
@@ -173,7 +180,7 @@ export function useEmergencyCall({
     _textSnippet = "",
   ) => {
     lastTriggerPhraseRef.current = detectedKeyword;
-    triggerManually("alert");
+    triggerManually("alert", detectedKeyword);
   };
 
   // Start active conversation
@@ -189,6 +196,9 @@ export function useEmergencyCall({
       callerName: selectedScenario.callerName,
       onTranscript: (line) => {
         setTranscript((prev) => (prev ? `${prev}\n${line}` : line));
+      },
+      onUserTranscript: (userText) => {
+        handleUserTranscript(userText, true);
       },
       onEmergencyTriggered: (reason) => {
         executeEmergencyAlert(reason);

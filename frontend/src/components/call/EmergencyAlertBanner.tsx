@@ -48,6 +48,17 @@ export const EmergencyAlertBanner: React.FC<EmergencyAlertBannerProps> = ({
                   <MapPin className="w-3 h-3 mr-1 text-rose-400" />
                   {getTranslation(language, "smsSentTo")} {alertDetails.recipient}
                 </p>
+                {alertDetails.lat !== 0 && alertDetails.lng !== 0 && (
+                  <a
+                    href={`https://maps.google.com/?q=${alertDetails.lat.toFixed(6)},${alertDetails.lng.toFixed(6)}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="mt-1.5 inline-flex items-center text-[11px] font-semibold text-rose-300 hover:text-white underline"
+                  >
+                    <MapPin className="w-3 h-3 mr-1 text-rose-400" />
+                    Google Maps ({alertDetails.lat.toFixed(4)}, {alertDetails.lng.toFixed(4)})
+                  </a>
+                )}
               </div>
             </div>
           </motion.div>

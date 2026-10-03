@@ -64,14 +64,10 @@ class MockNotifier:
         if alert_data.trigger_phrase:
             print(f"   Trigger:   \"{alert_data.trigger_phrase}\"")
         print(f"   SMS Body:  \"{simulated_message}\"")
-        if maps_url and "maps.google.com" in maps_url:
+        if maps_url:
             print(f"   Maps Link: {maps_url}")
-
-        if alert_data.level == "emergency":
-            print("   📞 [SIMULATED VOICE CALL] Auto-dialing contact with synthesized voice alert...")
-            print("   📞 [SIMULATED VOICE CALL] Status: Connected (Simulation)")
-
         print("   ✅ Status:   SMS DISPATCHED (Mock Delivery Successful)")
+        print("   ℹ️  Note:     Silent SMS only — NO emergency services (112) or voice calls are triggered.")
         print("=" * 65 + "\n", flush=True)
 
         return [Delivery(channel="mock", status="sent")]

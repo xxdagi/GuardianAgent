@@ -138,7 +138,31 @@ export function createApp() {
       return;
     }
     try {
-      res.status(201).json(await backend.createAlert(body));
+      const alert = await backend.createAlert(body);
+
+      const maskedPhone =
+        body.recipientPhone.length > 6
+          ? body.recipientPhone.slice(0, 5) + "***" + body.recipientPhone.slice(-3)
+          : body.recipientPhone;
+      const locationStr = body.location
+        ? `lat=${body.location.latitude.toFixed(6)}, lon=${body.location.longitude.toFixed(6)}`
+        : "Unavailable";
+      const mapsUrl = alert.mapsUrl;
+
+      console.log("\n" + "=".repeat(65));
+      console.log("🚨 [BFF ALERT DISPATCHED] Silent Alert Received from Client!");
+      console.log(`   Source:    ${body.source.toUpperCase()}`);
+      console.log(`   Level:     ${body.level.toUpperCase()}`);
+      console.log(`   Trigger:   "${body.triggerPhrase || body.transcriptSnippet || "N/A"}"`);
+      console.log(`   Recipient: ${body.recipientName} (${maskedPhone})`);
+      console.log(`   GPS:       ${locationStr}`);
+      if (mapsUrl) {
+        console.log(`   Maps URL:  ${mapsUrl}`);
+      }
+      console.log("   ✅ Status:   SENT TO BACKEND (Silent SMS Only - NO Emergency Services Dispatched)");
+      console.log("=".repeat(65) + "\n");
+
+      res.status(201).json(alert);
     } catch (err) {
       next(err);
     }

@@ -4,6 +4,7 @@ import { api } from "../api";
 export interface ElevenLabsSessionCallbacks {
   callerName?: string;
   onTranscript?: (transcript: string, isFinal: boolean) => void;
+  onUserTranscript?: (userText: string) => void;
   onEmergencyTriggered?: (reason: string) => void;
   onStatusChange?: (status: string) => void;
   onError?: (error: unknown) => void;
@@ -33,6 +34,11 @@ export class ElevenLabsService {
             callbacks.onEmergencyTriggered?.(detectedReason);
             return { status: "emergency_alert_dispatched" };
           },
+          trigger_alert: async (params: { reason?: string; level?: string; keyword?: string }) => {
+            const detectedReason = params.reason || params.keyword || "danger_detected";
+            callbacks.onEmergencyTriggered?.(detectedReason);
+            return { status: "emergency_alert_dispatched" };
+          },
         },
         onConnect: () => {
           this.isConnected = true;
@@ -48,6 +54,9 @@ export class ElevenLabsService {
         },
         onMessage: (data: { message: string; source: "user" | "ai" }) => {
           if (data && data.message) {
+            if (data.source === "user") {
+              callbacks.onUserTranscript?.(data.message);
+            }
             const sender = data.source === "user" ? "Ty" : (callbacks.callerName || "Agent");
             callbacks.onTranscript?.(`${sender}: ${data.message}`, true);
           }
