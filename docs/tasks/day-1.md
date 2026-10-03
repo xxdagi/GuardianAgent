@@ -95,15 +95,15 @@ Owns: `backend/`. Branches: `feat/backend-realtime`, `feat/backend-alerts`.
 - [x] **Done when:** `make test-backend` and `make lint` are green.
 
 ### B2. Alerts endpoint with mock notifier - H+1:15 -> H+2:15 (needs C1)
-- [ ] Pydantic models in `backend/app/models.py` matching the alert schemas.
-- [ ] `Notifier` protocol (`send_sms`, `place_call`) + `MockNotifier` in `app/services/notifier.py`:
+- [x] Pydantic models in `backend/app/models.py` matching the alert schemas.
+- [x] `Notifier` protocol (`send_sms`, `place_call`) + `MockNotifier` in `app/services/notifier.py`:
   - Builds simulated SMS text with Google Maps link: `maps_url = f"https://maps.google.com/?q={lat:.6f},{lon:.6f}"` (or location unavailable fallback).
   - Records the dispatched alert in in-memory storage for the Live Dispatcher Feed.
   - Returns delivery status (`channel: "mock"`, `status: "sent"`). Never logs full phone numbers.
-- [ ] `POST /api/v1/alerts`: receives alert payload, calls notifier, stores in memory, returns 201 with delivery info.
-- [ ] `GET /api/v1/alerts`: returns list of alerts (newest first) for the Live Dispatcher Dashboard.
-- [ ] Tests in `test_api.py`: valid alert -> 201; no location -> 201 with fallback text; invalid payload -> 422 unified error.
-- **Done when:** `pytest` passes; C can consume `GET /api/v1/alerts` and `POST /api/v1/alerts`.
+- [x] `POST /api/v1/alerts`: receives alert payload, calls notifier, stores in memory, returns 201 with delivery info.
+- [x] `GET /api/v1/alerts`: returns list of alerts (newest first) for the Live Dispatcher Dashboard.
+- [x] Tests in `test_api.py`: valid alert -> 201; no location -> 201 with fallback text; invalid payload -> 422 unified error.
+- [x] **Done when:** `pytest` passes; C can consume `GET /api/v1/alerts` and `POST /api/v1/alerts`.
 
 ### B3. Live Alerts Feed Polish & Optional Telegram Provider - H+2:15 -> H+3:30
 - [ ] Verify `GET /api/v1/alerts` contains all fields needed by the dispatcher (timestamp, trigger phrase, transcript snippet, map coordinates).

@@ -1,7 +1,7 @@
 openapi: 3.0.3
 info:
   title: BFF API
-  version: 0.1.0
+  version: 0.2.0
   description: Public-facing API for the frontend. Producer - bff (TypeScript). Consumer - frontend. Uses camelCase.
 servers:
   - url: http://localhost:4000
@@ -49,6 +49,39 @@ paths:
           $ref: "#/components/responses/Error"
         "502":
           $ref: "#/components/responses/Error"
+  /api/alerts:
+    get:
+      summary: List emergency alerts
+      responses:
+        "200":
+          description: List of alerts
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Alert"
+        "502":
+          $ref: "#/components/responses/Error"
+    post:
+      summary: Trigger emergency alert
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AlertCreate"
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Alert"
+        "400":
+          $ref: "#/components/responses/Error"
+        "502":
+          $ref: "#/components/responses/Error"
 components:
   responses:
     Error:
@@ -75,6 +108,69 @@ components:
       required: [name]
       properties:
         name: { type: string, minLength: 1, maxLength: 200 }
+    Location:
+      type: object
+      required: [latitude, longitude]
+      properties:
+        latitude: { type: number, minimum: -90, maximum: 90 }
+        longitude: { type: number, minimum: -180, maximum: 180 }
+        accuracy: { type: number, nullable: true }
+    DeliveryStatus:
+      type: object
+      required: [channel, status]
+      properties:
+        channel: { type: string, enum: [mock, telegram] }
+        status: { type: string, enum: [sent, failed] }
+    AlertCreate:
+      type: object
+      required: [sessionId, level, source, recipientName, recipientPhone]
+      properties:
+        sessionId: { type: string }
+        level: { type: string, enum: [alert, emergency] }
+        source: { type: string, enum: [keyword, agent, manual] }
+        triggerPhrase: { type: string, nullable: true }
+        language: { type: string, enum: [pl, en], default: pl }
+        recipientName: { type: string }
+        recipientPhone: { type: string }
+        location:
+          anyOf:
+            - $ref: "#/components/schemas/Location"
+            - type: "null"
+        transcriptSnippet: { type: string, nullable: true }
+    Alert:
+      type: object
+      required:
+        - id
+        - sessionId
+        - level
+        - source
+        - language
+        - recipientName
+        - recipientPhone
+        - simulatedMessage
+        - deliveries
+        - createdAt
+      properties:
+        id: { type: string }
+        sessionId: { type: string }
+        level: { type: string, enum: [alert, emergency] }
+        source: { type: string, enum: [keyword, agent, manual] }
+        triggerPhrase: { type: string, nullable: true }
+        language: { type: string, enum: [pl, en] }
+        recipientName: { type: string }
+        recipientPhone: { type: string }
+        location:
+          anyOf:
+            - $ref: "#/components/schemas/Location"
+            - type: "null"
+        transcriptSnippet: { type: string, nullable: true }
+        mapsUrl: { type: string, nullable: true }
+        simulatedMessage: { type: string }
+        deliveries:
+          type: array
+          items:
+            $ref: "#/components/schemas/DeliveryStatus"
+        createdAt: { type: string, format: date-time }
     Error:
       type: object
       required: [error]

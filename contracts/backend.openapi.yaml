@@ -1,7 +1,7 @@
 openapi: 3.0.3
 info:
   title: Backend API
-  version: 0.1.0
+  version: 0.2.0
   description: Internal API. Producer - backend (Python). Consumer - bff only.
 servers:
   - url: http://localhost:8000
@@ -45,6 +45,35 @@ paths:
                 $ref: "#/components/schemas/Item"
         "422":
           $ref: "#/components/responses/Error"
+  /api/v1/alerts:
+    get:
+      summary: List emergency alerts (newest first)
+      responses:
+        "200":
+          description: List of alerts for dispatcher feed
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Alert"
+    post:
+      summary: Trigger silent emergency alert
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AlertCreate"
+      responses:
+        "201":
+          description: Alert created and dispatched
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Alert"
+        "422":
+          $ref: "#/components/responses/Error"
 components:
   responses:
     Error:
@@ -71,6 +100,69 @@ components:
       required: [name]
       properties:
         name: { type: string, minLength: 1, maxLength: 200 }
+    Location:
+      type: object
+      required: [latitude, longitude]
+      properties:
+        latitude: { type: number, minimum: -90, maximum: 90 }
+        longitude: { type: number, minimum: -180, maximum: 180 }
+        accuracy: { type: number, nullable: true }
+    DeliveryStatus:
+      type: object
+      required: [channel, status]
+      properties:
+        channel: { type: string, enum: [mock, telegram] }
+        status: { type: string, enum: [sent, failed] }
+    AlertCreate:
+      type: object
+      required: [session_id, level, source, recipient_name, recipient_phone]
+      properties:
+        session_id: { type: string }
+        level: { type: string, enum: [alert, emergency] }
+        source: { type: string, enum: [keyword, agent, manual] }
+        trigger_phrase: { type: string, nullable: true }
+        language: { type: string, enum: [pl, en], default: pl }
+        recipient_name: { type: string }
+        recipient_phone: { type: string }
+        location:
+          anyOf:
+            - $ref: "#/components/schemas/Location"
+            - type: "null"
+        transcript_snippet: { type: string, nullable: true }
+    Alert:
+      type: object
+      required:
+        - id
+        - session_id
+        - level
+        - source
+        - language
+        - recipient_name
+        - recipient_phone
+        - simulated_message
+        - deliveries
+        - created_at
+      properties:
+        id: { type: string }
+        session_id: { type: string }
+        level: { type: string, enum: [alert, emergency] }
+        source: { type: string, enum: [keyword, agent, manual] }
+        trigger_phrase: { type: string, nullable: true }
+        language: { type: string, enum: [pl, en] }
+        recipient_name: { type: string }
+        recipient_phone: { type: string }
+        location:
+          anyOf:
+            - $ref: "#/components/schemas/Location"
+            - type: "null"
+        transcript_snippet: { type: string, nullable: true }
+        maps_url: { type: string, nullable: true }
+        simulated_message: { type: string }
+        deliveries:
+          type: array
+          items:
+            $ref: "#/components/schemas/DeliveryStatus"
+        created_at: { type: string, format: date-time }
     Error:
       type: object
       required: [error]
