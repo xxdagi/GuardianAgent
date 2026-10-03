@@ -2,6 +2,7 @@ import { Conversation } from "@elevenlabs/client";
 import { api } from "../api";
 
 export interface ElevenLabsSessionCallbacks {
+  callerName?: string;
   onTranscript?: (transcript: string, isFinal: boolean) => void;
   onEmergencyTriggered?: (reason: string) => void;
   onStatusChange?: (status: string) => void;
@@ -47,7 +48,8 @@ export class ElevenLabsService {
         },
         onMessage: (data: { message: string; source: "user" | "ai" }) => {
           if (data && data.message) {
-            callbacks.onTranscript?.(`${data.source === "user" ? "Ty" : "Mama"}: ${data.message}`, true);
+            const sender = data.source === "user" ? "Ty" : (callbacks.callerName || "Agent");
+            callbacks.onTranscript?.(`${sender}: ${data.message}`, true);
           }
         },
       };
