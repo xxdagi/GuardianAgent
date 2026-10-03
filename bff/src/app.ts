@@ -154,29 +154,34 @@ export function createApp() {
 
   app.get("/api/elevenlabs/signed-url", async (_req, res, next) => {
     try {
-      if (!config.elevenLabsApiKey || !config.elevenLabsAgentId) {
-        res.status(500).json(apiError("CONFIG_ERROR", "ElevenLabs credentials not configured"));
+      if (!config.elevenLabsAgentId) {
+        res.status(500).json(apiError("CONFIG_ERROR", "ElevenLabs agent ID not configured"));
         return;
       }
-      const response = await fetch(
-        `https://api.elevenlabs.io/v1/convai/conversation/get_signed_url?agent_id=${encodeURIComponent(config.elevenLabsAgentId)}`,
-        {
-          headers: {
-            "xi-api-key": config.elevenLabsApiKey,
-          },
+
+      let signedUrl: string | undefined = undefined;
+      if (config.elevenLabsApiKey) {
+        try {
+          const response = await fetch(
+            `https://api.elevenlabs.io/v1/convai/conversation/get_signed_url?agent_id=${encodeURIComponent(config.elevenLabsAgentId)}`,
+            {
+              headers: {
+                "xi-api-key": config.elevenLabsApiKey,
+              },
+            }
+          );
+          if (response.ok) {
+            const data = (await response.json()) as { signed_url?: string };
+            if (data.signed_url) {
+              signedUrl = data.signed_url;
+            }
+          }
+        } catch {
+          // Fall back to direct agentId
         }
-      );
-      if (!response.ok) {
-        const errorText = await response.text();
-        res.status(502).json(apiError("UPSTREAM_ERROR", `ElevenLabs API error: ${response.status}`, { details: errorText }));
-        return;
       }
-      const data = (await response.json()) as { signed_url?: string };
-      if (!data.signed_url) {
-        res.status(502).json(apiError("UPSTREAM_ERROR", "Missing signed_url in ElevenLabs response"));
-        return;
-      }
-      res.json({ signedUrl: data.signed_url });
+
+      res.json({ agentId: config.elevenLabsAgentId, signedUrl });
     } catch (err) {
       next(err);
     }

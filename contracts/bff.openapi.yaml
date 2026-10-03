@@ -99,11 +99,13 @@ components:
         status: { type: string, example: ok }
     ElevenLabsSignedUrlResponse:
       type: object
-      required: [signedUrl]
       properties:
         signedUrl:
           type: string
           description: Ephemeral WebSocket URL for ElevenLabs Conversational AI session.
+        agentId:
+          type: string
+          description: Public ElevenLabs agent ID.
     RealtimeSessionCreate:
       type: object
       required: [sessionId, language, alertPhrases, emergencyPhrases]

@@ -318,9 +318,15 @@ describe("bff", () => {
   });
 
   it("returns 500 when ElevenLabs credentials are not configured", async () => {
+    const { config } = await import("./config.js");
+    const prevAgentId = config.elevenLabsAgentId;
+    config.elevenLabsAgentId = "";
+
     const res = await request(createApp()).get("/api/elevenlabs/signed-url");
     expect(res.status).toBe(500);
     expect(res.body.error.code).toBe("CONFIG_ERROR");
+
+    config.elevenLabsAgentId = prevAgentId;
   });
 
   it("fetches signed-url when ElevenLabs credentials are set", async () => {

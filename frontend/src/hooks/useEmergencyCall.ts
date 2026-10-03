@@ -132,7 +132,10 @@ export function useEmergencyCall({
       lng,
     });
 
-    speechService.speak(selectedScenario.deterrentResponse);
+    // Only speak local deterrent if ElevenLabs is not connected (ElevenLabs agent handles its own response)
+    if (!elevenLabsService.getIsConnected()) {
+      speechService.speak(selectedScenario.deterrentResponse);
+    }
   }, [lastAlert, contact, coords, language, selectedScenario.deterrentResponse]);
 
   // Schedule call with countdown
@@ -180,28 +183,25 @@ export function useEmergencyCall({
     setAlertDetails(null);
     setTranscript("");
 
-    // Try starting ElevenLabs conversational agent
+    // Start ElevenLabs conversational agent directly with user's agent settings
     const elevenLabsStarted = await elevenLabsService.startConversation({
+      callerName: selectedScenario.callerName,
       onTranscript: (line) => {
         setTranscript((prev) => (prev ? `${prev}\n${line}` : line));
       },
       onEmergencyTriggered: (reason) => {
         executeEmergencyAlert(reason);
       },
-      onError: () => {
-        // Fallback to local speech synthesis if ElevenLabs fails
-        speechService.speak(selectedScenario.initialGreeting);
+      onError: (err) => {
+        console.warn("ElevenLabs conversation error:", err);
       },
     });
 
     if (!elevenLabsStarted) {
-      // Fallback: Speak initial persona greeting via Web Speech API
-      setTimeout(() => {
-        speechService.speak(selectedScenario.initialGreeting);
-      }, 600);
+      console.warn("Could not connect to ElevenLabs agent.");
     }
 
-    // Start background speech recognition and forward transcripts directly to C4
+    // Forward background speech recognition transcripts to safety monitor
     speechService.startListening(
       (newTranscript, isFinal) => {
         if (!elevenLabsStarted) {
