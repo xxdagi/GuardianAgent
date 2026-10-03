@@ -10,6 +10,7 @@ import type {
   Language,
   ActiveView,
 } from "../types";
+import { getTranslation } from "../i18n";
 
 interface UseEmergencyCallParams {
   language: Language;
@@ -110,9 +111,7 @@ export function useEmergencyCall({
         ? `${contact.name} (${contact.phone})`
         : contact.phone ||
           contact.name ||
-          (language === "pl"
-            ? "Zaufany kontakt / 112"
-            : "Trusted Contact / 112");
+          getTranslation(language, "trustedContactFallback");
 
     let lat = coords?.latitude ?? 0;
     let lng = coords?.longitude ?? 0;
@@ -127,7 +126,7 @@ export function useEmergencyCall({
     setAlertDetails({
       keyword:
         lastTriggerPhraseRef.current ||
-        (language === "pl" ? "Fraza alarmowa" : "Alert keyword"),
+        getTranslation(language, "alertPhraseLabel"),
       recipient: recipientText,
       lat,
       lng,

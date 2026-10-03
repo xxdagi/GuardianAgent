@@ -6,23 +6,21 @@ import type {
   Language,
 } from "../types";
 import {
-  DEFAULT_CALLERS_PL,
-  DEFAULT_CALLERS_EN,
-  DEFAULT_TOPICS_PL,
-  DEFAULT_TOPICS_EN,
+  getDefaultCallers,
+  getDefaultTopics,
   buildDefaultScenario,
 } from "../i18n";
 
 const LOCAL_STORAGE_KEY = "guardian_agent_settings_v5";
 
 export function useScenarios(language: Language) {
-  const [defaultCallers, setDefaultCallers] = useState<DefaultCallerOption[]>(DEFAULT_CALLERS_PL);
-  const [defaultTopics, setDefaultTopics] = useState<DefaultTopicOption[]>(DEFAULT_TOPICS_PL);
-  const [selectedCaller, setSelectedCaller] = useState<DefaultCallerOption>(DEFAULT_CALLERS_PL[0]);
-  const [selectedTopic, setSelectedTopic] = useState<DefaultTopicOption>(DEFAULT_TOPICS_PL[0]);
+  const [defaultCallers, setDefaultCallers] = useState<DefaultCallerOption[]>(() => getDefaultCallers(language));
+  const [defaultTopics, setDefaultTopics] = useState<DefaultTopicOption[]>(() => getDefaultTopics(language));
+  const [selectedCaller, setSelectedCaller] = useState<DefaultCallerOption>(() => getDefaultCallers(language)[0]);
+  const [selectedTopic, setSelectedTopic] = useState<DefaultTopicOption>(() => getDefaultTopics(language)[0]);
   const [customScenarios, setCustomScenarios] = useState<ConversationScenario[]>([]);
-  const [selectedScenario, setSelectedScenario] = useState<ConversationScenario>(
-    buildDefaultScenario(DEFAULT_CALLERS_PL[0], DEFAULT_TOPICS_PL[0], language)
+  const [selectedScenario, setSelectedScenario] = useState<ConversationScenario>(() =>
+    buildDefaultScenario(getDefaultCallers(language)[0], getDefaultTopics(language)[0], language)
   );
 
   // 1. Load saved scenarios from localStorage
@@ -60,8 +58,8 @@ export function useScenarios(language: Language) {
 
   // 3. Update default caller/topic options and scenario when language changes
   useEffect(() => {
-    const callers = language === "pl" ? DEFAULT_CALLERS_PL : DEFAULT_CALLERS_EN;
-    const topics = language === "pl" ? DEFAULT_TOPICS_PL : DEFAULT_TOPICS_EN;
+    const callers = getDefaultCallers(language);
+    const topics = getDefaultTopics(language);
     setDefaultCallers(callers);
     setDefaultTopics(topics);
 
