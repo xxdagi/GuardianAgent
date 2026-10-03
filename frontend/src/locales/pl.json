@@ -119,7 +119,7 @@
   "defaultContactName": "Zaufany kontakt",
   "defaultGreetingTemplate": "Cześć! Tu {name}. Gdzie jesteś? Czekam na Ciebie.",
   "defaultDeterrentResponse": "Dobrze, to ja już zakładam buty i wychodzę przed klatkę, będę na dole za minutę!",
-  "trustedContactFallback": "Zaufany kontakt / 112",
+  "trustedContactFallback": "Zaufany kontakt",
   "alertPhraseLabel": "Fraza alarmowa",
   "speechDetectorActive": "Wykrywacz mowy aktywny",
   "callerMamaRole": "Mama",

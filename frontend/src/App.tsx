@@ -5,6 +5,7 @@ import { SettingsScreen } from "./components/SettingsScreen";
 import { AddConversationPage } from "./components/AddConversationPage";
 import { IncomingCallScreen } from "./components/IncomingCallScreen";
 import { ActiveCallScreen } from "./components/ActiveCallScreen";
+import { MockSmsViewer } from "./components/MockSmsViewer";
 import { PhoneMockupFrame } from "./components/layout/PhoneMockupFrame";
 import { useAppSettings } from "./hooks/useAppSettings";
 import { useScenarios } from "./hooks/useScenarios";
@@ -12,7 +13,21 @@ import { useEmergencyCall } from "./hooks/useEmergencyCall";
 import type { ActiveView } from "./types";
 
 export default function App() {
-  const [currentView, setCurrentView] = useState<ActiveView>("home");
+  const [currentView, setCurrentView] = useState<ActiveView>(() => {
+    if (typeof window !== "undefined") {
+      const path = window.location.pathname.toLowerCase();
+      const params = new URLSearchParams(window.location.search);
+      if (
+        path.includes("/sms") ||
+        path.includes("/dispatcher") ||
+        params.get("view") === "sms" ||
+        window.location.port === "3001"
+      ) {
+        return "sms";
+      }
+    }
+    return "home";
+  });
 
   // 1. Settings state & persistence
   const {
@@ -82,6 +97,7 @@ export default function App() {
           callDelaySeconds={callDelaySeconds}
           coords={coords}
           contactName={contact.name}
+          onOpenSmsViewer={() => setCurrentView("sms")}
         />
       )}
 
@@ -158,6 +174,16 @@ export default function App() {
           alertDetails={alertDetails}
           onSimulateKeyword={(kw) => executeEmergencyAlert(kw, `Simulated word: ${kw}`)}
           keywords={keywords}
+        />
+      )}
+
+      {/* 7. MOCK SMS VIEWER (RECIPIENT'S PHONE) */}
+      {currentView === "sms" && (
+        <MockSmsViewer
+          language={language}
+          theme={theme}
+          onBackToApp={() => setCurrentView("home")}
+          contact={contact}
         />
       )}
     </PhoneMockupFrame>

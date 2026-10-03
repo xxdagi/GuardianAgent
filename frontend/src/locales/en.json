@@ -119,7 +119,7 @@
   "defaultContactName": "Trusted Contact",
   "defaultGreetingTemplate": "Hey! It's {name}. Where are you right now? I'm waiting for you.",
   "defaultDeterrentResponse": "Alright, I'm putting on my shoes and coming down to meet you outside right now!",
-  "trustedContactFallback": "Trusted Contact / 112",
+  "trustedContactFallback": "Trusted Contact",
   "alertPhraseLabel": "Alert keyword",
   "speechDetectorActive": "Speech detector active",
   "callerMamaRole": "Mom",

@@ -18,6 +18,7 @@ interface HomePageProps {
   callDelaySeconds: number;
   coords: GeoCoordinates | null;
   contactName?: string;
+  onOpenSmsViewer?: () => void;
 }
 
 export const HomePage: React.FC<HomePageProps> = ({
@@ -32,6 +33,8 @@ export const HomePage: React.FC<HomePageProps> = ({
   scheduledSeconds,
   callDelaySeconds,
   coords,
+  contactName = "Zaufany kontakt",
+  onOpenSmsViewer,
 }) => {
   const isDark = theme === "dark";
 
@@ -68,6 +71,19 @@ export const HomePage: React.FC<HomePageProps> = ({
         selectedScenario={selectedScenario}
         onNavigateToConversations={onNavigateToConversations}
       />
+
+      {/* Quick link to Mock SMS (Recipient Phone View) */}
+      {onOpenSmsViewer && (
+        <div className="mt-3 text-center">
+          <button
+            onClick={onOpenSmsViewer}
+            className="inline-flex items-center space-x-1.5 px-3 py-1.5 rounded-xl border border-[#9cadc0]/40 text-[11px] font-bold text-[#1c2b39]/80 dark:text-[#c0d4ed]/80 hover:border-[#9cadc0] hover:bg-[#e6effa]/50 dark:hover:bg-[#18222e] transition-all"
+          >
+            <span>📱</span>
+            <span>{language === "pl" ? "Podgląd SMS odbiorcy (Telefon Mamy)" : "Recipient's SMS Preview (Mom's Phone)"}</span>
+          </button>
+        </div>
+      )}
     </div>
   );
 };

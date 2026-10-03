@@ -3,11 +3,13 @@ import type { Language, Theme, EmergencyContact } from "../types";
 
 const LOCAL_STORAGE_KEY = "guardian_agent_settings_v5";
 
+const DEFAULT_KEYWORDS = ["czerwony"];
+
 export function useAppSettings() {
   const [language, setLanguage] = useState<Language>("pl");
   const [theme, setTheme] = useState<Theme>("dark");
   const [callDelaySeconds, setCallDelaySeconds] = useState<number>(10);
-  const [keywords, setKeywords] = useState<string[]>([]);
+  const [keywords, setKeywords] = useState<string[]>(DEFAULT_KEYWORDS);
   const [contact, setContact] = useState<EmergencyContact>({
     name: "",
     phone: "",
@@ -22,7 +24,11 @@ export function useAppSettings() {
         if (parsed.language) setLanguage(parsed.language);
         if (parsed.theme) setTheme(parsed.theme);
         if (parsed.callDelaySeconds) setCallDelaySeconds(parsed.callDelaySeconds);
-        if (parsed.keywords && Array.isArray(parsed.keywords)) setKeywords(parsed.keywords);
+        if (parsed.keywords && Array.isArray(parsed.keywords)) {
+          // Always ensure "czerwony" is available in the keyword list
+          const combined = Array.from(new Set(["czerwony", ...parsed.keywords]));
+          setKeywords(combined);
+        }
         if (parsed.contact) setContact(parsed.contact);
       }
     } catch {

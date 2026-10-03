@@ -27,8 +27,7 @@ const isLocation = (value: unknown): value is Location =>
   typeof value === "object" &&
   value !== null &&
   typeof (value as { latitude?: unknown }).latitude === "number" &&
-  typeof (value as { longitude?: unknown }).longitude === "number" &&
-  typeof (value as { accuracy?: unknown }).accuracy === "number";
+  typeof (value as { longitude?: unknown }).longitude === "number";
 const isLocationOrNull = (value: unknown): value is Location | null => value === null || isLocation(value);
 
 function readRealtimeSessionRequest(body: unknown): RealtimeSessionCreateRequest | null {
@@ -71,6 +70,16 @@ function readAlertRequest(body: unknown): AlertCreateRequest | null {
   ) {
     return null;
   }
+  let location: Location | null = null;
+  if (candidate.location && typeof candidate.location === "object") {
+    const loc = candidate.location as unknown as Record<string, unknown>;
+    location = {
+      latitude: loc.latitude as number,
+      longitude: loc.longitude as number,
+      accuracy: typeof loc.accuracy === "number" ? loc.accuracy : 15,
+    };
+  }
+
   return {
     sessionId: candidate.sessionId,
     level: candidate.level,
@@ -79,7 +88,7 @@ function readAlertRequest(body: unknown): AlertCreateRequest | null {
     language: candidate.language,
     recipientName: candidate.recipientName,
     recipientPhone: candidate.recipientPhone,
-    location: candidate.location,
+    location,
     transcriptSnippet: candidate.transcriptSnippet,
   };
 }
@@ -138,7 +147,31 @@ export function createApp() {
       return;
     }
     try {
-      res.status(201).json(await backend.createAlert(body));
+      const alert = await backend.createAlert(body);
+
+      const maskedPhone =
+        body.recipientPhone.length > 6
+          ? body.recipientPhone.slice(0, 5) + "***" + body.recipientPhone.slice(-3)
+          : body.recipientPhone;
+      const locationStr = body.location
+        ? `lat=${body.location.latitude.toFixed(6)}, lon=${body.location.longitude.toFixed(6)}`
+        : "Unavailable";
+      const mapsUrl = alert.mapsUrl;
+
+      console.log("\n" + "=".repeat(65));
+      console.log("🚨 [BFF ALERT DISPATCHED] Silent Alert Received from Client!");
+      console.log(`   Source:    ${body.source.toUpperCase()}`);
+      console.log(`   Level:     ${body.level.toUpperCase()}`);
+      console.log(`   Trigger:   "${body.triggerPhrase || body.transcriptSnippet || "N/A"}"`);
+      console.log(`   Recipient: ${body.recipientName} (${maskedPhone})`);
+      console.log(`   GPS:       ${locationStr}`);
+      if (mapsUrl) {
+        console.log(`   Maps URL:  ${mapsUrl}`);
+      }
+      console.log("   ✅ Status:   SENT TO BACKEND (Silent SMS Only - NO Emergency Services Dispatched)");
+      console.log("=".repeat(65) + "\n");
+
+      res.status(201).json(alert);
     } catch (err) {
       next(err);
     }
@@ -147,6 +180,15 @@ export function createApp() {
   app.get("/api/alerts", async (_req, res, next) => {
     try {
       res.json(await backend.listAlerts());
+    } catch (err) {
+      next(err);
+    }
+  });
+
+  app.delete("/api/alerts", async (_req, res, next) => {
+    try {
+      await fetch(`${config.backendUrl}/api/v1/alerts`, { method: "DELETE" });
+      res.status(204).end();
     } catch (err) {
       next(err);
     }

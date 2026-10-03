@@ -12,7 +12,7 @@ import { useGeolocation, type GpsStatus } from "./useGeolocation";
 export interface SafetyMonitorHookResult {
   handleUserTranscript(text: string, isFinal: boolean): void;
   handleToolCall(name: string, args: unknown): void;
-  triggerManually(level: "alert" | "emergency"): void;
+  triggerManually(level: "alert" | "emergency", triggerPhrase?: string): void;
   lastAlert: AlertResponse | null;
   gpsStatus: GpsStatus;
 }
@@ -63,7 +63,7 @@ export function useSafetyMonitor(
           ? {
               latitude: loc.latitude,
               longitude: loc.longitude,
-              accuracy: loc.accuracy,
+              accuracy: typeof loc.accuracy === "number" ? loc.accuracy : 15,
             }
           : null;
 
@@ -155,11 +155,11 @@ export function useSafetyMonitor(
   );
 
   const triggerManually = useCallback(
-    (level: "alert" | "emergency") => {
+    (level: "alert" | "emergency", triggerPhrase?: string) => {
       if (level !== "alert" && level !== "emergency") {
         return;
       }
-      void dispatchAlert(level, "manual");
+      void dispatchAlert(level, "manual", triggerPhrase);
     },
     [dispatchAlert],
   );

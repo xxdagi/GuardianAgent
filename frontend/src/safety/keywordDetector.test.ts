@@ -145,4 +145,31 @@ describe("keywordDetector (C4)", () => {
       phrase: "Zadzwoń DO Dziadka!",
     });
   });
+
+  it("detects 'czerwony' and its Polish declensions", () => {
+    const settingsWithRed: SafetySettings = {
+      ...baseSettings,
+      alertPhrases: ["czerwony"],
+    };
+
+    expect(detect("czerwony", settingsWithRed)).toEqual({
+      level: "alert",
+      phrase: "czerwony",
+    });
+
+    expect(detect("widzę czerwony samochód", settingsWithRed)).toEqual({
+      level: "alert",
+      phrase: "czerwony",
+    });
+
+    expect(detect("mam na sobie czerwoną bluzę", settingsWithRed)).toEqual({
+      level: "alert",
+      phrase: "czerwony",
+    });
+
+    expect(detect("to jest czerwone auto", settingsWithRed)).toEqual({
+      level: "alert",
+      phrase: "czerwony",
+    });
+  });
 });

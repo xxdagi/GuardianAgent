@@ -27,3 +27,7 @@ lint:
 	cd backend && . .venv/bin/activate && ruff check .
 	cd bff && npm run typecheck
 	cd frontend && npm run typecheck
+
+# Mock SMS receiver screen on http://localhost:3001
+sms:
+	cd frontend && npm run sms

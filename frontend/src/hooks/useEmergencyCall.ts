@@ -58,13 +58,32 @@ export function useEmergencyCall({
   }
   const activeSessionId = sessionId ?? defaultSessionIdRef.current;
 
+  const resolvedAlertPhrases = Array.from(
+    new Set([
+      "czerwony",
+      "czerwona",
+      "czerwone",
+      ...(keywords.length > 0 ? keywords : []),
+    ]),
+  );
+
+  const resolvedEmergencyPhrases = Array.from(
+    new Set([
+      "czerwony",
+      "czerwona",
+      "czerwone",
+      "zadzwoń do dziadka",
+      "call grandpa",
+    ]),
+  );
+
   const activeSafetySettings: SafetySettings = safetySettings ?? {
     language,
     contactName: contact.name || "Zaufany kontakt",
     contactPhone: contact.phone || "+48000000000",
-    alertPhrases: keywords.length > 0 ? keywords : ["czy nakarmiłaś kota"],
-    emergencyPhrases: ["zadzwoń do dziadka", "call grandpa"],
-    emergencyNumber: contact.phone || "112",
+    alertPhrases: resolvedAlertPhrases,
+    emergencyPhrases: resolvedEmergencyPhrases,
+    emergencyNumber: contact.phone || "",
   };
 
   // C4 Safety Pipeline is the sole source of truth for keyword detection and alert dispatch
@@ -78,8 +97,8 @@ export function useEmergencyCall({
 
   // 1. Sync keywords with speech service
   useEffect(() => {
-    speechService.setKeywords(keywords);
-  }, [keywords]);
+    speechService.setKeywords(resolvedAlertPhrases);
+  }, [resolvedAlertPhrases]);
 
   // 2. Continuous GPS tracking for home screen preview coordinates
   useEffect(() => {
@@ -132,10 +151,17 @@ export function useEmergencyCall({
       lng,
     });
 
-    // Only speak local deterrent if ElevenLabs is not connected (ElevenLabs agent handles its own response)
-    if (!elevenLabsService.getIsConnected()) {
-      speechService.speak(selectedScenario.deterrentResponse);
+    // Haptic vibration feedback on caller's phone
+    if (typeof navigator !== "undefined" && "vibrate" in navigator) {
+      try {
+        navigator.vibrate([200, 100, 200]);
+      } catch {
+        // Ignore vibration errors
+      }
     }
+
+    // Speak deterrent response so caller gets verbal confirmation and camouflage
+    speechService.speak(selectedScenario.deterrentResponse);
   }, [lastAlert, contact, coords, language, selectedScenario.deterrentResponse]);
 
   // Schedule call with countdown
@@ -172,7 +198,7 @@ export function useEmergencyCall({
     _textSnippet = "",
   ) => {
     lastTriggerPhraseRef.current = detectedKeyword;
-    triggerManually("alert");
+    triggerManually("alert", detectedKeyword);
   };
 
   // Start active conversation
@@ -188,6 +214,9 @@ export function useEmergencyCall({
       callerName: selectedScenario.callerName,
       onTranscript: (line) => {
         setTranscript((prev) => (prev ? `${prev}\n${line}` : line));
+      },
+      onUserTranscript: (userText) => {
+        handleUserTranscript(userText, true);
       },
       onEmergencyTriggered: (reason) => {
         executeEmergencyAlert(reason);

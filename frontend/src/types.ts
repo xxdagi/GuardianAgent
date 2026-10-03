@@ -30,7 +30,7 @@ export interface AlertPayload {
 }
 
 export type CallState = "idle" | "incoming" | "connected" | "ended";
-export type ActiveView = "home" | "settings" | "conversations" | "add_conversation" | "incoming" | "connected";
+export type ActiveView = "home" | "settings" | "conversations" | "add_conversation" | "incoming" | "connected" | "sms";
 
 export interface DefaultCallerOption {
   id: string;

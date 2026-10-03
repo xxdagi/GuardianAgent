@@ -1,9 +1,10 @@
 import React, { useEffect, useState } from "react";
+import { motion } from "framer-motion";
+import { PhoneOff, ShieldAlert } from "lucide-react";
 import type { ConversationScenario, Language } from "../types";
 import { ActiveCallStatusBar } from "./call/ActiveCallStatusBar";
 import { ActiveCallHeader } from "./call/ActiveCallHeader";
 import { CallControlsGrid } from "./call/CallControlsGrid";
-import { EndCallButton } from "./call/EndCallButton";
 
 interface ActiveCallScreenProps {
   scenario: ConversationScenario;
@@ -72,10 +73,48 @@ export const ActiveCallScreen: React.FC<ActiveCallScreenProps> = ({
         onToggleSpeaker={() => setIsSpeaker((prev) => !prev)}
       />
 
-      <EndCallButton
-        language={language}
-        onEndCall={onEndCall}
-      />
+      {/* 4. Action Buttons: Red End Call & Red SOS Trigger */}
+      <div className="flex items-center justify-center space-x-10 pb-4">
+        {/* Red End Call Button */}
+        <div className="flex flex-col items-center">
+          <motion.button
+            whileTap={{ scale: 0.92 }}
+            onClick={onEndCall}
+            className="w-16 h-16 rounded-full bg-red-600 active:bg-red-700 text-white flex items-center justify-center shadow-lg shadow-red-950/50 transition-colors"
+            aria-label="Zakończ połączenie"
+          >
+            <PhoneOff className="w-7 h-7 fill-current" />
+          </motion.button>
+          <span className="text-[11px] text-neutral-400 mt-1.5 font-medium">
+            {language === "pl" ? "Rozłącz" : "End Call"}
+          </span>
+        </div>
+
+        {/* Dedicated Red SOS Button (Sends Silent SMS with GPS) */}
+        <div className="flex flex-col items-center">
+          <motion.button
+            whileTap={{ scale: 0.92 }}
+            onClick={() => onSimulateKeyword(keywords?.[0] || "czerwony")}
+            className={`w-16 h-16 rounded-full flex items-center justify-center shadow-lg transition-all ${
+              emergencyTriggered
+                ? "bg-rose-950/80 border-2 border-rose-500 text-rose-300 shadow-rose-950/80"
+                : "bg-red-600 active:bg-red-700 text-white shadow-red-950/60 ring-4 ring-red-500/30 animate-pulse"
+            }`}
+            aria-label="Wyślij natychmiast cichy SMS SOS"
+          >
+            <ShieldAlert className="w-8 h-8" />
+          </motion.button>
+          <span className="text-[11px] text-rose-400 font-bold mt-1.5">
+            {emergencyTriggered
+              ? language === "pl"
+                ? "SMS WYSŁANY"
+                : "SMS SENT"
+              : language === "pl"
+              ? "SOS (SMS)"
+              : "SOS (SMS)"}
+          </span>
+        </div>
+      </div>
     </div>
   );
 };

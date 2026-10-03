@@ -63,6 +63,28 @@ export const ActiveCallHeader: React.FC<ActiveCallHeaderProps> = ({
         {formatDuration(seconds)}
       </p>
 
+      {/* Quick Keyword chip helper: user can either SPEAK it or TAP it */}
+      {!emergencyTriggered && (
+        <div className="mt-3 flex items-center justify-center flex-wrap gap-2">
+          {(keywords && keywords.length > 0 ? keywords.slice(0, 2) : ["czerwony"]).map((kw) => (
+            <button
+              key={kw}
+              onClick={() => onSimulateKeyword(kw)}
+              className="px-3 py-1 rounded-full bg-neutral-900/90 border border-neutral-700 hover:border-rose-500/60 text-xs text-neutral-300 hover:text-rose-300 flex items-center space-x-1.5 transition-all shadow-sm active:scale-95"
+              title="Kliknij lub powiedz to hasło, aby cicho wysłać SMS"
+            >
+              <span className="w-2 h-2 rounded-full bg-rose-500 animate-pulse" />
+              <span className="text-[11px]">
+                {language === "pl" ? "Hasło:" : "Keyword:"}{" "}
+                <span className="font-bold text-white underline decoration-rose-500/60">
+                  "{kw}"
+                </span>
+              </span>
+            </button>
+          ))}
+        </div>
+      )}
+
       {/* Emergency Alert Confirmation & Live Transcript */}
       <EmergencyAlertBanner
         language={language}
