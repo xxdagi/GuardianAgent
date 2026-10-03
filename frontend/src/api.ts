@@ -23,8 +23,22 @@ async function request<T>(path: string, init?: RequestInit): Promise<T> {
   return (await res.json()) as T;
 }
 
+import type { AlertPayload } from "./types";
+
 export const api = {
   listItems: () => request<Item[]>("/items"),
   createItem: (name: string) =>
     request<Item>("/items", { method: "POST", body: JSON.stringify({ name }) }),
+  sendAlert: async (payload: AlertPayload): Promise<boolean> => {
+    try {
+      await request<unknown>("/alert", {
+        method: "POST",
+        body: JSON.stringify(payload),
+      });
+      return true;
+    } catch (err) {
+      console.warn("BFF alert endpoint not reachable, fallback to mock alert:", err);
+      return false;
+    }
+  },
 };
