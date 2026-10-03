@@ -227,7 +227,8 @@ export function useEmergencyCall({
     });
 
     if (!elevenLabsStarted) {
-      console.warn("Could not connect to ElevenLabs agent.");
+      console.warn("Could not connect to ElevenLabs agent. Falling back to local speech synthesis.");
+      speechService.speak(selectedScenario.initialGreeting);
     }
 
     // Forward background speech recognition transcripts to safety monitor

@@ -2,11 +2,10 @@ import dotenv from "dotenv";
 import path from "node:path";
 import fs from "node:fs";
 
-// Load from multiple locations so user can have a single .env at root or in backend
+// Load from root .env (or local fallback if run from root)
 const envCandidates = [
-  path.resolve(".env"),
   path.resolve("../.env"),
-  path.resolve("../backend/.env"),
+  path.resolve(".env"),
 ];
 for (const envPath of envCandidates) {
   if (fs.existsSync(envPath)) {

@@ -22,14 +22,14 @@ One command from the repo root:
 make setup
 ```
 
-It copies each `.env.example` to `.env` (if missing), creates `backend/.venv`, and installs Python and npm dependencies.
+It copies `.env.example` to `.env` at root (if missing), creates `backend/.venv`, and installs Python and npm dependencies.
+
+SafeCall supports a **single root `.env` file** at the root of the project! You don't need to edit multiple files — just configure everything in `.env` at the project root.
 
 Manual equivalent:
 
 ```bash
-cp backend/.env.example backend/.env
-cp bff/.env.example bff/.env
-cp frontend/.env.example frontend/.env
+cp .env.example .env
 
 cd backend && python3 -m venv .venv && . .venv/bin/activate && pip install -r requirements-dev.txt && cd ..
 cd bff && npm install && cd ..
@@ -40,22 +40,17 @@ Create the venv only once. Afterwards just activate it: `. backend/.venv/bin/act
 
 > Never commit `.env` files. Put real secrets only in your local `.env`. See [secrets skill](agents/skills/secrets.md).
 
-## 3. Environment variables
+## 3. Environment variables (configured in single root `.env`)
 
-| Service  | Variable | Default | Purpose |
-|----------|----------|---------|---------|
-| backend  | `APP_ENV` | `development` | environment name |
-| backend  | `CORS_ORIGINS` | `http://localhost:4000` | comma-separated allowed origins |
-| backend  | `GEMINI_API_KEY` | `""` | Google AI Studio API key (**free, no credit card**: https://aistudio.google.com) |
-| backend  | `GEMINI_MODEL` | `gemini-2.0-flash` | reasoning model for Mom conversation |
-| backend  | `ELEVENLABS_API_KEY` | `""` | ElevenLabs API key (**free tier, no credit card**: https://elevenlabs.io) |
-| backend  | `ELEVENLABS_VOICE_ID` | `21m00Tcm4TlvDq8ikWAM` | voice ID for warm Mom persona (multilingual v2) |
-| backend  | `ALERT_PROVIDER` | `mock` | alert dispatch provider (`mock` feeds live dispatcher dashboard) |
-| bff      | `PORT` | `4000` | listen port |
-| bff      | `BACKEND_URL` | `http://localhost:8000` | where the backend lives |
-| bff      | `CORS_ORIGIN` | `http://localhost:5173` | allowed frontend origin |
-| frontend | `VITE_API_BASE_URL` | `/api` | BFF base path (public value, no secrets) |
-| frontend | `BFF_URL` (shell env, dev proxy only) | `http://localhost:4000` | Vite dev proxy target |
+| Variable | Default | Purpose |
+|----------|---------|---------|
+| `ELEVENLABS_API_KEY` | `""` | ElevenLabs API key (**free tier, no credit card**: https://elevenlabs.io) |
+| `ELEVENLABS_AGENT_ID` | `""` | ElevenLabs Conversational AI Agent ID for real-time voice conversation |
+| `PORT` | `4000` | BFF listen port |
+| `BACKEND_URL` | `http://localhost:8000` | Backend API URL for BFF proxy |
+| `CORS_ORIGIN` | `http://localhost:5173` | Allowed frontend origin for BFF |
+| `CORS_ORIGINS` | `http://localhost:4000` | Allowed origin for Backend |
+| `APP_ENV` | `development` | Environment name |
 
 ## 4. Run locally (3 terminals)
 

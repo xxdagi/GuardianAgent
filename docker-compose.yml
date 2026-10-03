@@ -1,11 +1,11 @@
 services:
   backend:
     build: ./backend
-    env_file: ./backend/.env
+    env_file: .env
     ports: ["8000:8000"]
   bff:
     build: ./bff
-    env_file: ./bff/.env
+    env_file: .env
     environment:
       BACKEND_URL: http://backend:8000
     depends_on: [backend]
