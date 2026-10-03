@@ -1,8 +1,14 @@
 import { useState, useRef, useEffect } from "react";
 import { speechService } from "../services/speech";
 import { geoService, type GeoCoordinates } from "../services/geolocation";
-import { api } from "../api";
-import type { ConversationScenario, EmergencyContact, Language, ActiveView } from "../types";
+import { useSafetyMonitor } from "../safety/useSafetyMonitor";
+import type { SafetySettings } from "../types/settings";
+import type {
+  ConversationScenario,
+  EmergencyContact,
+  Language,
+  ActiveView,
+} from "../types";
 
 interface UseEmergencyCallParams {
   language: Language;
@@ -11,6 +17,8 @@ interface UseEmergencyCallParams {
   keywords: string[];
   contact: EmergencyContact;
   onNavigate: (view: ActiveView) => void;
+  safetySettings?: SafetySettings;
+  sessionId?: string;
 }
 
 export function useEmergencyCall({
@@ -20,8 +28,12 @@ export function useEmergencyCall({
   keywords,
   contact,
   onNavigate,
+  safetySettings,
+  sessionId,
 }: UseEmergencyCallParams) {
-  const [scheduledCountdown, setScheduledCountdown] = useState<number | null>(null);
+  const [scheduledCountdown, setScheduledCountdown] = useState<number | null>(
+    null,
+  );
   const [coords, setCoords] = useState<GeoCoordinates | null>(null);
   const [transcript, setTranscript] = useState("");
   const [emergencyTriggered, setEmergencyTriggered] = useState(false);
@@ -32,14 +44,42 @@ export function useEmergencyCall({
     lng: number;
   } | null>(null);
 
-  const countdownTimerRef = useRef<any>(null);
+  const countdownTimerRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const lastTriggerPhraseRef = useRef<string>("");
+
+  const defaultSessionIdRef = useRef<string>("");
+  if (!defaultSessionIdRef.current) {
+    defaultSessionIdRef.current =
+      typeof crypto !== "undefined" && typeof crypto.randomUUID === "function"
+        ? crypto.randomUUID()
+        : `session-${Date.now()}`;
+  }
+  const activeSessionId = sessionId ?? defaultSessionIdRef.current;
+
+  const activeSafetySettings: SafetySettings = safetySettings ?? {
+    language,
+    contactName: contact.name || "Zaufany kontakt",
+    contactPhone: contact.phone || "+48000000000",
+    alertPhrases: keywords.length > 0 ? keywords : ["czy nakarmiłaś kota"],
+    emergencyPhrases: ["zadzwoń do dziadka", "call grandpa"],
+    emergencyNumber: contact.phone || "112",
+  };
+
+  // C4 Safety Pipeline is the sole source of truth for keyword detection and alert dispatch
+  const {
+    handleUserTranscript,
+    handleToolCall,
+    triggerManually,
+    lastAlert,
+    gpsStatus,
+  } = useSafetyMonitor(activeSafetySettings, activeSessionId);
 
   // 1. Sync keywords with speech service
   useEffect(() => {
     speechService.setKeywords(keywords);
   }, [keywords]);
 
-  // 2. Continuous GPS tracking
+  // 2. Continuous GPS tracking for home screen preview coordinates
   useEffect(() => {
     geoService.startTracking((newCoords) => {
       setCoords(newCoords);
@@ -58,6 +98,43 @@ export function useEmergencyCall({
     };
   }, []);
 
+  // 4. Update UI state when C4 dispatches an alert
+  useEffect(() => {
+    if (!lastAlert) return;
+
+    setEmergencyTriggered(true);
+
+    const recipientText =
+      contact.name && contact.phone
+        ? `${contact.name} (${contact.phone})`
+        : contact.phone ||
+          contact.name ||
+          (language === "pl"
+            ? "Zaufany kontakt / 112"
+            : "Trusted Contact / 112");
+
+    let lat = coords?.latitude ?? 0;
+    let lng = coords?.longitude ?? 0;
+    if (lastAlert.mapsUrl) {
+      const match = lastAlert.mapsUrl.match(/q=([\d.-]+),([\d.-]+)/);
+      if (match) {
+        lat = parseFloat(match[1]);
+        lng = parseFloat(match[2]);
+      }
+    }
+
+    setAlertDetails({
+      keyword:
+        lastTriggerPhraseRef.current ||
+        (language === "pl" ? "Fraza alarmowa" : "Alert keyword"),
+      recipient: recipientText,
+      lat,
+      lng,
+    });
+
+    speechService.speak(selectedScenario.deterrentResponse);
+  }, [lastAlert, contact, coords, language, selectedScenario.deterrentResponse]);
+
   // Schedule call with countdown
   const scheduleCall = () => {
     if (scheduledCountdown !== null) return;
@@ -68,7 +145,7 @@ export function useEmergencyCall({
     countdownTimerRef.current = setInterval(() => {
       setScheduledCountdown((prev) => {
         if (prev === null || prev <= 1) {
-          clearInterval(countdownTimerRef.current);
+          if (countdownTimerRef.current) clearInterval(countdownTimerRef.current);
           onNavigate("incoming");
           return null;
         }
@@ -86,40 +163,13 @@ export function useEmergencyCall({
     setScheduledCountdown(null);
   };
 
-  // Silent emergency dispatch
-  const executeEmergencyAlert = async (detectedKeyword: string, textSnippet = "") => {
-    if (emergencyTriggered) return;
-
-    setEmergencyTriggered(true);
-
-    const currentLocation = await geoService.getCurrentLocation();
-    setCoords(currentLocation);
-
-    const now = new Date();
-    const recipientText =
-      contact.name && contact.phone
-        ? `${contact.name} (${contact.phone})`
-        : contact.phone || contact.name || (language === "pl" ? "Zaufany kontakt / 112" : "Trusted Contact / 112");
-
-    setAlertDetails({
-      keyword: detectedKeyword,
-      recipient: recipientText,
-      lat: currentLocation.latitude,
-      lng: currentLocation.longitude,
-    });
-
-    await api.sendAlert({
-      contactName: contact.name || "Zaufany kontakt",
-      contactPhone: contact.phone || "112",
-      latitude: currentLocation.latitude,
-      longitude: currentLocation.longitude,
-      accuracy: currentLocation.accuracy,
-      triggerKeyword: detectedKeyword,
-      transcriptSnippet: textSnippet || `Keyword triggered: ${detectedKeyword}`,
-      timestamp: now.toISOString(),
-    });
-
-    speechService.speak(selectedScenario.deterrentResponse);
+  // Manual or legacy test trigger routed through C4 triggerManually
+  const executeEmergencyAlert = (
+    detectedKeyword: string,
+    _textSnippet = "",
+  ) => {
+    lastTriggerPhraseRef.current = detectedKeyword;
+    triggerManually("alert");
   };
 
   // Start active conversation
@@ -135,14 +185,15 @@ export function useEmergencyCall({
       speechService.speak(selectedScenario.initialGreeting);
     }, 600);
 
-    // Start background speech recognition
+    // Start background speech recognition and forward transcripts directly to C4
     speechService.startListening(
-      (newTranscript) => {
+      (newTranscript, isFinal) => {
         setTranscript(newTranscript);
+        handleUserTranscript(newTranscript, isFinal);
       },
-      (detectedKeyword, fullText) => {
-        executeEmergencyAlert(detectedKeyword, fullText);
-      }
+      () => {
+        // C4 useSafetyMonitor is the sole source of truth for keyword detection
+      },
     );
   };
 
@@ -166,5 +217,9 @@ export function useEmergencyCall({
     startActiveCall,
     endActiveCall,
     executeEmergencyAlert,
+    handleToolCall,
+    triggerManually,
+    gpsStatus,
+    lastAlert,
   };
 }
