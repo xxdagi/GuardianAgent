@@ -14,18 +14,13 @@ export class ElevenLabsService {
 
   public async startConversation(callbacks: ElevenLabsSessionCallbacks): Promise<boolean> {
     try {
-      // 1. Try to get signed URL from BFF (preferred, keeps ELEVENLABS_API_KEY secure on backend)
-      let signedUrl: string | null = null;
-      try {
-        signedUrl = await api.getElevenLabsSignedUrl();
-      } catch {
-        signedUrl = null;
-      }
+      // 1. Fetch ElevenLabs config from BFF (so user only configures ONE .env!)
+      const config = await api.getElevenLabsConfig();
+      const signedUrl = config?.signedUrl ?? null;
+      const agentId = config?.agentId || import.meta.env.VITE_ELEVENLABS_AGENT_ID;
 
-      // 2. Fallback to public agent ID from Vite env if signed URL is not configured
-      const publicAgentId = import.meta.env.VITE_ELEVENLABS_AGENT_ID;
-
-      if (!signedUrl && !publicAgentId) {
+      if (!signedUrl && !agentId) {
+        console.warn("ElevenLabs not configured (no signedUrl and no agentId)");
         return false;
       }
 
@@ -60,7 +55,7 @@ export class ElevenLabsService {
       if (signedUrl) {
         sessionOptions.signedUrl = signedUrl;
       } else {
-        sessionOptions.agentId = publicAgentId;
+        sessionOptions.agentId = agentId;
       }
 
       this.activeConversation = await Conversation.startSession(sessionOptions);

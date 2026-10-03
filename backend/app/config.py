@@ -23,7 +23,7 @@ class Settings(BaseSettings):
     # Exclusively mock is used for the hackathon demo
     alert_provider: str = "mock"
 
-    model_config = {"env_file": ".env", "extra": "ignore"}
+    model_config = {"env_file": [".env", "../.env"], "extra": "ignore"}
 
 
 settings = Settings()
