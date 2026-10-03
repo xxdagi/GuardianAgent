@@ -119,7 +119,7 @@ components:
       type: object
       required: [channel, status]
       properties:
-        channel: { type: string, enum: [mock, telegram] }
+        channel: { type: string, enum: [mock] }
         status: { type: string, enum: [sent, failed] }
     AlertCreate:
       type: object

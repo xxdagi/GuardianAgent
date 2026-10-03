@@ -11,9 +11,8 @@ class Settings(BaseSettings):
     openai_realtime_voice: str = "alloy"
 
     # Alert notification provider (mock simulates SMS and feeds live dispatcher dashboard)
-    alert_provider: str = "mock"  # "mock" | "telegram"
-    telegram_bot_token: str = ""
-    telegram_chat_id: str = ""
+    # Exclusively mock is used for the hackathon demo
+    alert_provider: str = "mock"
 
     model_config = {"env_file": ".env", "extra": "ignore"}
 

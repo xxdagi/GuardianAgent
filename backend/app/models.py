@@ -23,7 +23,7 @@ class Location(BaseModel):
 
 
 class DeliveryStatus(BaseModel):
-    channel: Literal["mock", "telegram"] = "mock"
+    channel: Literal["mock"] = "mock"
     status: Literal["sent", "failed"] = "sent"
 
 

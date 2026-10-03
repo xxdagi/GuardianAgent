@@ -58,6 +58,6 @@ HackYeah 2026 | Live Presentation & Demo Playbook
 | Risk | Live Fallback Plan |
 |------|--------------------|
 | **Loud venue noise drowns microphone** | Presenter uses in-line headset mic. If speech recognition drops, secretly **long-press the Mom avatar for 2s** (hidden manual trigger fires the same alert). |
-| **Twilio SMS delay / blocked network** | Switch backend to `ALERT_PROVIDER=telegram` (instant Telegram bot message) or `ALERT_PROVIDER=mock` (instant visual drop on Dispatcher dashboard). |
+| **External network / telecom failure** | Backend relies strictly on `ALERT_PROVIDER=mock` (instant visual drop on Dispatcher dashboard, zero telecom dependencies). |
 | **Complete internet failure** | Play pre-recorded 60-second backup video (`docs/demo-backup.mp4`) showing the live phone + SMS delivery. |
 | **GPS denied on phone** | Alert sends with `location: null` and fallback message: *"Location unavailable - urgent assistance requested"*. |

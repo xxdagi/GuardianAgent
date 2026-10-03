@@ -52,7 +52,7 @@ Code phrases sound natural in a conversation, so an attacker does not notice the
 | D4 | **Mom never reveals the alert.** After a tool call the frontend returns `function_call_output` (`{"ok": true}`) and Mom continues the normal conversation. | The disguise must hold. |
 | D5 | **Geolocation via `navigator.geolocation.watchPosition`** with `enableHighAccuracy`, value in `useRef`, `clearWatch` on unmount. No reverse geocoding. | From `localisation.md`. |
 | D6 | **Silent alert must go through the backend.** Browsers cannot send SMS in the background (`sms:` opens the Messages app and breaks the disguise). | From `dane-wyjściowe.pdf`, section 1. |
-| D7 | Backend has a **pluggable notifier** selected by `ALERT_PROVIDER`: `mock` (default for dev/tests), `twilio`, `smsapi`, `telegram`. Provider choice - see section 3. | The demo is never blocked by the provider account. |
+| D7 | Backend uses **Mock Notifier + Live Dispatcher Dashboard** (`ALERT_PROVIDER=mock`). Telegram was evaluated and removed as unnecessary per product decision to keep the stack 100% demo-proof and focused on the dispatcher dashboard. | The demo is never blocked by external provider accounts or telecom networks. |
 | D8 | **Language**: setting `pl` / `en`. It controls Mom's instructions, the transcription language hint and the UI labels (small dictionary, no i18n library). | Requirement: Polish / English. |
 | D9 | Realtime model is configurable via env (`OPENAI_REALTIME_MODEL`). Use the cheaper/mini realtime model while developing, the best one for the demo. **Set a monthly spend limit in the OpenAI dashboard.** | Realtime audio is the most expensive part of the stack. |
 | D10 | Settings stored client-side in `localStorage` and sent with requests. No accounts/auth. | Hackathon scope. |
@@ -62,14 +62,12 @@ Code phrases sound natural in a conversation, so an attacker does not notice the
 
 ---
 
-## 3. Alert channel - which SMS provider? (decide by H+3)
-
 ## 3. Alert strategy for Hackathon: Mock Notifier + Live Dispatcher Dashboard
 
 For the hackathon demo, we use a **Mock Notifier paired with a Live Dispatcher Dashboard** (projector/laptop screen):
 - **Zero Telecom Friction**: No need to register paid SMS gateways, verify phone numbers on Twilio trial, or worry about SMS carrier delays in a crowded venue.
 - **Superior Jury Presentation**: While the user talks on their phone, the projector screen at `/dispatcher` instantly catches the alert in real time with GPS coordinates, Google Maps link, simulated SMS payload, and speech transcript.
-- **Clean Architecture**: Backend uses the Strategy pattern (`Notifier` protocol). `ALERT_PROVIDER=mock` is the robust default. An optional `ALERT_PROVIDER=telegram` is available as a free push fallback without altering business logic.
+- **Clean Architecture**: Backend uses the Strategy pattern (`Notifier` protocol). `ALERT_PROVIDER=mock` is the sole active strategy (real telecom and push integrations like Telegram were evaluated and intentionally removed as unnecessary).
 
 ---
 
