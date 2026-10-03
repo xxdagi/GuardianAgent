@@ -1,11 +1,8 @@
 .PHONY: setup up dev test test-backend test-bff test-frontend lint sms
 
-# First-time setup: env files + dependencies for all services.
+# First-time setup: env file + dependencies for all services.
 setup:
 	cp -n .env.example .env || true
-	cp -n backend/.env.example backend/.env || true
-	cp -n bff/.env.example bff/.env || true
-	cp -n frontend/.env.example frontend/.env || true
 	cd backend && ([ -d .venv ] || python3 -m venv .venv) && . .venv/bin/activate && pip install -r requirements-dev.txt
 	cd bff && npm install
 	cd frontend && npm install

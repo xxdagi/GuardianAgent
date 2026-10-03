@@ -30,9 +30,6 @@ Manual equivalent:
 
 ```bash
 cp .env.example .env
-cp backend/.env.example backend/.env
-cp bff/.env.example bff/.env
-cp frontend/.env.example frontend/.env
 
 cd backend && python3 -m venv .venv && . .venv/bin/activate && pip install -r requirements-dev.txt && cd ..
 cd bff && npm install && cd ..
