@@ -6,6 +6,7 @@ from fastapi.responses import JSONResponse
 from starlette.exceptions import HTTPException as StarletteHTTPException
 
 from app.config import settings
+from app.exceptions import UpstreamError
 from app.routes import v1_router
 from app.routes.health import router as health_router
 
@@ -31,6 +32,11 @@ async def validation_handler(_: Request, exc: RequestValidationError):
     return error_response(
         422, "VALIDATION_ERROR", "Invalid request", {"errors": jsonable_encoder(exc.errors())}
     )
+
+
+@app.exception_handler(UpstreamError)
+async def upstream_handler(_: Request, exc: UpstreamError):
+    return error_response(502, "UPSTREAM_ERROR", str(exc), exc.details)
 
 
 @app.exception_handler(StarletteHTTPException)

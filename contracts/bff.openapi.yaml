@@ -16,55 +16,29 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/Health"
-  /api/items:
-    get:
-      summary: List items
-      responses:
-        "200":
-          description: List of items
-          content:
-            application/json:
-              schema:
-                type: array
-                items:
-                  $ref: "#/components/schemas/Item"
-        "502":
-          $ref: "#/components/responses/Error"
+  /api/realtime/session:
     post:
-      summary: Create item
+      summary: Create realtime session
       requestBody:
         required: true
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/ItemCreate"
+              $ref: "#/components/schemas/RealtimeSessionCreate"
       responses:
         "201":
           description: Created
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/Item"
+                $ref: "#/components/schemas/RealtimeSessionResponse"
         "400":
           $ref: "#/components/responses/Error"
         "502":
           $ref: "#/components/responses/Error"
   /api/alerts:
-    get:
-      summary: List emergency alerts
-      responses:
-        "200":
-          description: List of alerts
-          content:
-            application/json:
-              schema:
-                type: array
-                items:
-                  $ref: "#/components/schemas/Alert"
-        "502":
-          $ref: "#/components/responses/Error"
     post:
-      summary: Trigger emergency alert
+      summary: Create alert
       requestBody:
         required: true
         content:
@@ -82,6 +56,19 @@ paths:
           $ref: "#/components/responses/Error"
         "502":
           $ref: "#/components/responses/Error"
+    get:
+      summary: List alerts
+      responses:
+        "200":
+          description: List of alerts
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/AlertListItem"
+        "502":
+          $ref: "#/components/responses/Error"
 components:
   responses:
     Error:
@@ -96,81 +83,159 @@ components:
       required: [status]
       properties:
         status: { type: string, example: ok }
-    Item:
+    RealtimeSessionCreate:
       type: object
-      required: [id, name, createdAt]
+      required: [sessionId, language, alertPhrases, emergencyPhrases]
       properties:
-        id: { type: string }
-        name: { type: string }
-        createdAt: { type: string, format: date-time }
-    ItemCreate:
+        sessionId:
+          type: string
+          description: Frontend-generated call/session UUID.
+        language:
+          type: string
+          enum: [pl, en]
+          description: UI and transcription language.
+        alertPhrases:
+          type: array
+          items:
+            type: string
+          description: Level 1 code phrases.
+        emergencyPhrases:
+          type: array
+          items:
+            type: string
+          description: Level 2 code phrases.
+    RealtimeSessionResponse:
       type: object
-      required: [name]
+      required: [clientSecret, expiresAt, model]
       properties:
-        name: { type: string, minLength: 1, maxLength: 200 }
+        clientSecret:
+          type: string
+          description: Ephemeral OpenAI client secret.
+        expiresAt:
+          type: string
+          format: date-time
+          description: Secret expiry timestamp.
+        model:
+          type: string
+          description: Realtime model name.
+    AlertCreate:
+      type: object
+      required: [sessionId, level, source, language, recipientName, recipientPhone, location]
+      properties:
+        sessionId:
+          type: string
+          description: Call/session UUID.
+        level:
+          type: string
+          enum: [alert, emergency]
+          description: Alert severity.
+        source:
+          type: string
+          enum: [keyword, agent, manual]
+          description: Alert origin.
+        triggerPhrase:
+          type: string
+          description: Detected phrase or manual trigger note.
+        language:
+          type: string
+          enum: [pl, en]
+          description: Alert language.
+        recipientName:
+          type: string
+          description: Trusted contact name.
+        recipientPhone:
+          type: string
+          description: Trusted contact phone.
+        location:
+          oneOf:
+            - $ref: "#/components/schemas/Location"
+            - type: "null"
+          description: GPS coordinates or null if unavailable.
+        transcriptSnippet:
+          type: string
+          description: Short transcript excerpt.
     Location:
       type: object
-      required: [latitude, longitude]
+      required: [latitude, longitude, accuracy]
       properties:
-        latitude: { type: number, minimum: -90, maximum: 90 }
-        longitude: { type: number, minimum: -180, maximum: 180 }
-        accuracy: { type: number, nullable: true }
-    DeliveryStatus:
+        latitude:
+          type: number
+          description: GPS latitude.
+        longitude:
+          type: number
+          description: GPS longitude.
+        accuracy:
+          type: number
+          description: GPS accuracy in meters.
+    Delivery:
       type: object
       required: [channel, status]
       properties:
-        channel: { type: string, enum: [mock] }
-        status: { type: string, enum: [sent, failed] }
-    AlertCreate:
-      type: object
-      required: [sessionId, level, source, recipientName, recipientPhone]
-      properties:
-        sessionId: { type: string }
-        level: { type: string, enum: [alert, emergency] }
-        source: { type: string, enum: [keyword, agent, manual] }
-        triggerPhrase: { type: string, nullable: true }
-        language: { type: string, enum: [pl, en], default: pl }
-        recipientName: { type: string }
-        recipientPhone: { type: string }
-        location:
-          anyOf:
-            - $ref: "#/components/schemas/Location"
-            - type: "null"
-        transcriptSnippet: { type: string, nullable: true }
+        channel:
+          type: string
+          enum: [mock]
+          description: Delivery channel.
+        status:
+          type: string
+          enum: [sent, failed]
+          description: Delivery status.
     Alert:
       type: object
-      required:
-        - id
-        - sessionId
-        - level
-        - source
-        - language
-        - recipientName
-        - recipientPhone
-        - simulatedMessage
-        - deliveries
-        - createdAt
+      required: [id, mapsUrl, deliveries, createdAt]
       properties:
-        id: { type: string }
-        sessionId: { type: string }
-        level: { type: string, enum: [alert, emergency] }
-        source: { type: string, enum: [keyword, agent, manual] }
-        triggerPhrase: { type: string, nullable: true }
-        language: { type: string, enum: [pl, en] }
-        recipientName: { type: string }
-        recipientPhone: { type: string }
-        location:
-          anyOf:
-            - $ref: "#/components/schemas/Location"
-            - type: "null"
-        transcriptSnippet: { type: string, nullable: true }
-        mapsUrl: { type: string, nullable: true }
-        simulatedMessage: { type: string }
+        id:
+          type: string
+          description: Alert id.
+        mapsUrl:
+          type: string
+          description: Google Maps link.
         deliveries:
           type: array
           items:
-            $ref: "#/components/schemas/DeliveryStatus"
-        createdAt: { type: string, format: date-time }
+            $ref: "#/components/schemas/Delivery"
+          description: Delivery results.
+        createdAt:
+          type: string
+          format: date-time
+          description: Alert creation time.
+    AlertListItem:
+      type: object
+      required: [id, sessionId, createdAt, level, source, location, deliveries]
+      properties:
+        id:
+          type: string
+          description: Alert id.
+        sessionId:
+          type: string
+          description: Call/session UUID.
+        createdAt:
+          type: string
+          format: date-time
+          description: Alert creation time.
+        level:
+          type: string
+          enum: [alert, emergency]
+          description: Alert severity.
+        source:
+          type: string
+          enum: [keyword, agent, manual]
+          description: Alert origin.
+        triggerPhrase:
+          type: string
+          description: Detected phrase or manual trigger note.
+        transcriptSnippet:
+          type: string
+          description: Short transcript excerpt.
+        location:
+          oneOf:
+            - $ref: "#/components/schemas/Location"
+            - type: "null"
+          description: GPS coordinates or null if unavailable.
+        deliveries:
+          type: array
+          items:
+            $ref: "#/components/schemas/Delivery"
+          description: Delivery results.
     Error:
       type: object
       required: [error]
@@ -182,5 +247,7 @@ components:
             code:
               type: string
               enum: [VALIDATION_ERROR, UNAUTHORIZED, FORBIDDEN, NOT_FOUND, UPSTREAM_ERROR, INTERNAL_ERROR]
-            message: { type: string }
-            details: { type: object }
+            message:
+              type: string
+            details:
+              type: object

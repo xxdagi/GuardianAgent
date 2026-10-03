@@ -1,13 +1,12 @@
 import logging
 from typing import Protocol
 
-from app.models import AlertCreate, DeliveryStatus
+from app.models import AlertCreate, Delivery
 
 logger = logging.getLogger("guardian.notifier")
 
 
 def _mask_phone(phone: str) -> str:
-    """Masks phone number for privacy in logs (e.g. +48123456789 -> +48123***789)."""
     if len(phone) > 6:
         return phone[:5] + "***" + phone[-3:]
     return phone
@@ -17,9 +16,9 @@ class NotifierProtocol(Protocol):
     async def dispatch(
         self,
         alert_data: AlertCreate,
-        maps_url: str | None,
+        maps_url: str,
         simulated_message: str,
-    ) -> list[DeliveryStatus]:
+    ) -> list[Delivery]:
         ...
 
 
@@ -35,14 +34,25 @@ class MockNotifier:
     async def dispatch(
         self,
         alert_data: AlertCreate,
-        maps_url: str | None,
+        maps_url: str,
         simulated_message: str,
-    ) -> list[DeliveryStatus]:
+    ) -> list[Delivery]:
         masked_phone = _mask_phone(alert_data.recipient_phone)
         location_str = (
             f"lat={alert_data.location.latitude:.6f}, lon={alert_data.location.longitude:.6f}"
             if alert_data.location
             else "Unavailable"
+        )
+
+        logger.info(
+            "mock alert dispatched",
+            extra={
+                "recipient_phone": masked_phone,
+                "level": alert_data.level,
+                "source": alert_data.source,
+                "maps_url": maps_url,
+                "message_preview": simulated_message[:80],
+            },
         )
 
         # Visual log to terminal for hackathon demo
@@ -54,7 +64,7 @@ class MockNotifier:
         if alert_data.trigger_phrase:
             print(f"   Trigger:   \"{alert_data.trigger_phrase}\"")
         print(f"   SMS Body:  \"{simulated_message}\"")
-        if maps_url:
+        if maps_url and "maps.google.com" in maps_url:
             print(f"   Maps Link: {maps_url}")
 
         if alert_data.level == "emergency":
@@ -64,8 +74,7 @@ class MockNotifier:
         print("   ✅ Status:   SMS DISPATCHED (Mock Delivery Successful)")
         print("=" * 65 + "\n", flush=True)
 
-        deliveries = [DeliveryStatus(channel="mock", status="sent")]
-        return deliveries
+        return [Delivery(channel="mock", status="sent")]
 
 
 def get_notifier() -> NotifierProtocol:

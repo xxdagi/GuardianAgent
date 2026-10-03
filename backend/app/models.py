@@ -4,7 +4,6 @@ from typing import Literal
 from pydantic import BaseModel, Field
 
 
-# --- Starter Item Models ---
 class ItemCreate(BaseModel):
     name: str = Field(min_length=1, max_length=200)
 
@@ -15,16 +14,31 @@ class Item(BaseModel):
     created_at: datetime
 
 
-# --- Alert Models ---
+class RealtimeSessionCreate(BaseModel):
+    session_id: str
+    language: Literal["pl", "en"]
+    alert_phrases: list[str]
+    emergency_phrases: list[str]
+
+
+class RealtimeSessionResponse(BaseModel):
+    client_secret: str
+    expires_at: str
+    model: str
+
+
 class Location(BaseModel):
-    latitude: float = Field(ge=-90.0, le=90.0)
-    longitude: float = Field(ge=-180.0, le=180.0)
-    accuracy: float | None = None
+    latitude: float
+    longitude: float
+    accuracy: float
 
 
-class DeliveryStatus(BaseModel):
+class Delivery(BaseModel):
     channel: Literal["mock"] = "mock"
     status: Literal["sent", "failed"] = "sent"
+
+
+DeliveryStatus = Delivery
 
 
 class AlertCreate(BaseModel):
@@ -32,25 +46,35 @@ class AlertCreate(BaseModel):
     level: Literal["alert", "emergency"]
     source: Literal["keyword", "agent", "manual"]
     trigger_phrase: str | None = None
-    language: Literal["pl", "en"] = "pl"
+    language: Literal["pl", "en"]
     recipient_name: str
     recipient_phone: str
-    location: Location | None = None
+    location: Location | None
     transcript_snippet: str | None = None
 
 
 class Alert(BaseModel):
     id: str
+    maps_url: str
+    deliveries: list[Delivery]
+    created_at: str
+
+
+class AlertListItem(BaseModel):
+    id: str
     session_id: str
+    created_at: str
     level: Literal["alert", "emergency"]
     source: Literal["keyword", "agent", "manual"]
     trigger_phrase: str | None = None
+    transcript_snippet: str | None = None
+    location: Location | None
+    deliveries: list[Delivery]
+
+
+class AlertRecord(AlertListItem):
     language: Literal["pl", "en"]
     recipient_name: str
     recipient_phone: str
-    location: Location | None = None
-    transcript_snippet: str | None = None
-    maps_url: str | None = None
+    maps_url: str
     simulated_message: str
-    deliveries: list[DeliveryStatus]
-    created_at: datetime
