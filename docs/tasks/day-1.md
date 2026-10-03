@@ -113,17 +113,17 @@ Owns: `backend/`. Branches: `feat/backend-realtime`, `feat/backend-alerts`.
 - [x] **Done when:** manual `curl` to `POST /api/v1/alerts` returns 201 and immediately shows up in `GET /api/v1/alerts`.
 
 ### B4. Realtime session endpoint - H+3:30 -> H+5:00 (needs C1)
-- [ ] `POST /api/v1/realtime/session`: calls `POST https://api.openai.com/v1/realtime/client_secrets` with the server API key and a session config:
+- [x] `POST /api/v1/realtime/session`: calls `POST https://api.openai.com/v1/realtime/client_secrets` with the server API key and a session config:
   - `model`, `voice` from env,
   - `instructions` = Mom prompt (B5) in the chosen language, with the code phrases,
   - `tools` = `[trigger_alert]` with JSON schema `{ level: "alert" | "emergency", reason: string }`,
   - input audio transcription enabled (transcribe model + language hint `pl`/`en`),
   - server-side turn detection (VAD).
   Check the exact field names against the current docs (GA vs beta shapes differ).
-- [ ] Return `client_secret`, `expires_at`, `model`. Never log the key or the secret. OpenAI error/timeout -> 502 `UPSTREAM_ERROR`.
-- [ ] Optional: pass the `OpenAI-Safety-Identifier` header with a hash of `session_id`.
-- [ ] Tests with `httpx` mocked: success, validation error, upstream error.
-- **Done when:** A can open a WebRTC call using the secret from this endpoint (through the BFF).
+- [x] Return `client_secret`, `expires_at`, `model`. Never log the key or the secret. OpenAI error/timeout -> 502 `UPSTREAM_ERROR`.
+- [x] Optional: pass the `OpenAI-Safety-Identifier` header with a hash of `session_id`.
+- [x] Tests with `httpx` mocked: success, validation error, upstream error.
+- [x] **Done when:** A can open a WebRTC call using the secret from this endpoint (through the BFF).
 
 ### B5. Mom prompt (PL + EN) - H+5:00 -> H+6:30
 - [ ] `app/services/prompts.py`: templates per language. Content:

@@ -1,24 +1,20 @@
-from datetime import datetime, timedelta, timezone
-from uuid import uuid4
+import inspect
 
 from fastapi import APIRouter
 
 from app.models import RealtimeSessionCreate, RealtimeSessionResponse
+from app.services.realtime import request_realtime_session
 
 router = APIRouter(prefix="/realtime", tags=["realtime"])
 
 
-def issue_realtime_session(_: RealtimeSessionCreate) -> RealtimeSessionResponse:
-    expires_at = (datetime.now(timezone.utc) + timedelta(minutes=30)).isoformat().replace(
-        "+00:00", "Z"
-    )
-    return RealtimeSessionResponse(
-        client_secret=f"ek_{uuid4().hex}",
-        expires_at=expires_at,
-        model="gpt-realtime-mini",
-    )
+async def issue_realtime_session(body: RealtimeSessionCreate) -> RealtimeSessionResponse:
+    return await request_realtime_session(body)
 
 
 @router.post("/session", response_model=RealtimeSessionResponse, status_code=201)
-def create_realtime_session(body: RealtimeSessionCreate):
-    return issue_realtime_session(body)
+async def create_realtime_session(body: RealtimeSessionCreate):
+    result = issue_realtime_session(body)
+    if inspect.isawaitable(result):
+        return await result
+    return result

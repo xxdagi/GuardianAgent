@@ -1,11 +1,14 @@
+from unittest.mock import AsyncMock, patch
+
+import httpx
 import pytest
 from fastapi.testclient import TestClient
 
-from app.exceptions import UpstreamError
+from app.config import settings
 from app.main import app
 from app.routes import alerts as alerts_route
-from app.routes import realtime as realtime_route
 from app.services.notifier import MockNotifier, get_notifier
+from app.services.prompts import build_mom_instructions
 
 client = TestClient(app)
 
@@ -23,7 +26,54 @@ def test_health():
     assert r.json() == {"status": "ok"}
 
 
-def test_create_realtime_session():
+def test_create_realtime_session_success(monkeypatch):
+    monkeypatch.setattr(settings, "openai_api_key", "sk-test-realtime-key")
+    monkeypatch.setattr(settings, "openai_realtime_model", "gpt-4o-realtime-preview")
+    monkeypatch.setattr(settings, "openai_realtime_voice", "alloy")
+
+    mock_resp = httpx.Response(
+        200,
+        json={
+            "value": "ek_test_secret_12345",
+            "expires_at": 1756310470,
+            "session": {"model": "gpt-4o-realtime-preview"},
+        },
+    )
+
+    with patch.object(httpx.AsyncClient, "post", new_callable=AsyncMock) as mock_post:
+        mock_post.return_value = mock_resp
+
+        r = client.post(
+            "/api/v1/realtime/session",
+            json={
+                "session_id": "session-123",
+                "language": "pl",
+                "alert_phrases": ["czy nakarmiłaś kota"],
+                "emergency_phrases": ["zadzwoń do dziadka"],
+            },
+        )
+        assert r.status_code == 201
+        data = r.json()
+        assert data["client_secret"] == "ek_test_secret_12345"
+        assert data["model"] == "gpt-4o-realtime-preview"
+        assert data["expires_at"].endswith("Z")
+
+        mock_post.assert_called_once()
+        call_args = mock_post.call_args
+        assert "client_secrets" in call_args.args[0]
+        assert call_args.kwargs["headers"]["Authorization"] == "Bearer sk-test-realtime-key"
+        assert "OpenAI-Safety-Identifier" in call_args.kwargs["headers"]
+
+        session_cfg = call_args.kwargs["json"]["session"]
+        assert session_cfg["voice"] == "alloy"
+        assert session_cfg["input_audio_transcription"]["language"] == "pl"
+        assert session_cfg["turn_detection"]["type"] == "server_vad"
+        assert session_cfg["tools"][0]["name"] == "trigger_alert"
+        assert "czy nakarmiłaś kota" in session_cfg["instructions"]
+
+
+def test_create_realtime_session_missing_api_key(monkeypatch):
+    monkeypatch.setattr(settings, "openai_api_key", "")
     r = client.post(
         "/api/v1/realtime/session",
         json={
@@ -33,11 +83,45 @@ def test_create_realtime_session():
             "emergency_phrases": ["zadzwoń do dziadka"],
         },
     )
-    data = r.json()
-    assert r.status_code == 201
-    assert data["client_secret"].startswith("ek_")
-    assert data["model"] == "gpt-realtime-mini"
-    assert data["expires_at"].endswith("Z")
+    assert r.status_code == 502
+    assert r.json()["error"]["code"] == "UPSTREAM_ERROR"
+
+
+def test_create_realtime_session_upstream_error(monkeypatch):
+    monkeypatch.setattr(settings, "openai_api_key", "sk-test-realtime-key")
+    mock_resp = httpx.Response(400, json={"error": {"message": "Invalid model"}})
+
+    with patch.object(httpx.AsyncClient, "post", new_callable=AsyncMock) as mock_post:
+        mock_post.return_value = mock_resp
+        r = client.post(
+            "/api/v1/realtime/session",
+            json={
+                "session_id": "session-123",
+                "language": "pl",
+                "alert_phrases": ["czy nakarmiłaś kota"],
+                "emergency_phrases": ["zadzwoń do dziadka"],
+            },
+        )
+        assert r.status_code == 502
+        assert r.json()["error"]["code"] == "UPSTREAM_ERROR"
+
+
+def test_create_realtime_session_timeout(monkeypatch):
+    monkeypatch.setattr(settings, "openai_api_key", "sk-test-realtime-key")
+
+    with patch.object(httpx.AsyncClient, "post", new_callable=AsyncMock) as mock_post:
+        mock_post.side_effect = httpx.TimeoutException("OpenAI timeout")
+        r = client.post(
+            "/api/v1/realtime/session",
+            json={
+                "session_id": "session-123",
+                "language": "pl",
+                "alert_phrases": ["czy nakarmiłaś kota"],
+                "emergency_phrases": ["zadzwoń do dziadka"],
+            },
+        )
+        assert r.status_code == 502
+        assert r.json()["error"]["code"] == "UPSTREAM_ERROR"
 
 
 def test_realtime_session_validation_error():
@@ -54,22 +138,16 @@ def test_realtime_session_validation_error():
     assert r.json()["error"]["code"] == "VALIDATION_ERROR"
 
 
-def test_realtime_session_upstream_error(monkeypatch):
-    def boom(_: object):
-        raise UpstreamError("upstream failed")
+def test_mom_instructions_prompts():
+    pl_prompt = build_mom_instructions("pl", ["nakarm kota"], ["zadzwoń do taty"])
+    assert "Jesteś mamą użytkownika" in pl_prompt
+    assert "nakarm kota" in pl_prompt
+    assert "trigger_alert" in pl_prompt
 
-    monkeypatch.setattr(realtime_route, "issue_realtime_session", boom)
-    r = client.post(
-        "/api/v1/realtime/session",
-        json={
-            "session_id": "session-123",
-            "language": "pl",
-            "alert_phrases": ["czy nakarmiłaś kota"],
-            "emergency_phrases": ["zadzwoń do dziadka"],
-        },
-    )
-    assert r.status_code == 502
-    assert r.json()["error"]["code"] == "UPSTREAM_ERROR"
+    en_prompt = build_mom_instructions("en", ["feed the dog"], ["call the police"])
+    assert "You are the user's mom" in en_prompt
+    assert "feed the dog" in en_prompt
+    assert "trigger_alert" in en_prompt
 
 
 def test_create_alert_with_location():
