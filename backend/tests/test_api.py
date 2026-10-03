@@ -18,7 +18,75 @@ def test_create_and_list_items():
     assert any(i["name"] == "demo" for i in client.get("/api/v1/items").json())
 
 
-def test_validation_error_format():
+def test_item_validation_error_format():
     r = client.post("/api/v1/items", json={"name": ""})
+    assert r.status_code == 422
+    assert r.json()["error"]["code"] == "VALIDATION_ERROR"
+
+
+def test_create_alert_with_location():
+    payload = {
+        "session_id": "test-session-123",
+        "level": "alert",
+        "source": "keyword",
+        "trigger_phrase": "czy nakarmiłaś kota",
+        "language": "pl",
+        "recipient_name": "Mama",
+        "recipient_phone": "+48123456789",
+        "location": {
+            "latitude": 52.406374,
+            "longitude": 16.925168,
+            "accuracy": 10.5,
+        },
+        "transcript_snippet": "Mamo a czy nakarmiłaś kota przed wyjściem?",
+    }
+    r = client.post("/api/v1/alerts", json=payload)
+    assert r.status_code == 201
+    data = r.json()
+    assert data["session_id"] == "test-session-123"
+    assert data["level"] == "alert"
+    assert data["maps_url"] == "https://maps.google.com/?q=52.406374,16.925168"
+    assert "https://maps.google.com/?q=52.406374,16.925168" in data["simulated_message"]
+    assert len(data["deliveries"]) == 1
+    assert data["deliveries"][0]["channel"] == "mock"
+    assert data["deliveries"][0]["status"] == "sent"
+
+
+def test_create_alert_without_location():
+    payload = {
+        "session_id": "test-session-456",
+        "level": "emergency",
+        "source": "manual",
+        "language": "en",
+        "recipient_name": "Dad",
+        "recipient_phone": "+48987654321",
+        "location": None,
+    }
+    r = client.post("/api/v1/alerts", json=payload)
+    assert r.status_code == 201
+    data = r.json()
+    assert data["maps_url"] is None
+    assert "unavailable" in data["simulated_message"].lower()
+    assert data["deliveries"][0]["status"] == "sent"
+
+
+def test_list_alerts():
+    r = client.get("/api/v1/alerts")
+    assert r.status_code == 200
+    alerts = r.json()
+    assert isinstance(alerts, list)
+    assert len(alerts) >= 2
+
+
+def test_alert_validation_error():
+    # Invalid level enum
+    payload = {
+        "session_id": "test-session-789",
+        "level": "non_existing_level",
+        "source": "keyword",
+        "recipient_name": "Test",
+        "recipient_phone": "+48111222333",
+    }
+    r = client.post("/api/v1/alerts", json=payload)
     assert r.status_code == 422
     assert r.json()["error"]["code"] == "VALIDATION_ERROR"
