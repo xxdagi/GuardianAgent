@@ -2,6 +2,7 @@
 
 # First-time setup: env files + dependencies for all services.
 setup:
+	cp -n .env.example .env || true
 	cp -n backend/.env.example backend/.env || true
 	cp -n bff/.env.example bff/.env || true
 	cp -n frontend/.env.example frontend/.env || true

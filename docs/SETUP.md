@@ -22,11 +22,14 @@ One command from the repo root:
 make setup
 ```
 
-It copies each `.env.example` to `.env` (if missing), creates `backend/.venv`, and installs Python and npm dependencies.
+It copies `.env.example` to `.env` at root (if missing), creates `backend/.venv`, and installs Python and npm dependencies.
+
+SafeCall supports a **single root `.env` file** at the root of the project! You don't need to edit multiple files — just configure everything in `.env` at the project root.
 
 Manual equivalent:
 
 ```bash
+cp .env.example .env
 cp backend/.env.example backend/.env
 cp bff/.env.example bff/.env
 cp frontend/.env.example frontend/.env
