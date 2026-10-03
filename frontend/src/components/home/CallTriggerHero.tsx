@@ -63,7 +63,7 @@ export const CallTriggerHero: React.FC<CallTriggerHeroProps> = ({
             </span>
             <span className="text-xs sm:text-[13px] text-[#1c2b39]/75 dark:text-[#c0d4ed]/70 font-semibold mt-0.5 block">
               {isCountingDown
-                ? (language === "pl" ? "Dotknij, aby anulować" : "Tap to cancel")
+                ? getTranslation(language, "tapToCancel")
                 : getTranslation(language, "quickCallDelaySub")}
             </span>
           </div>
