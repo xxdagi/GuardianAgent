@@ -94,7 +94,7 @@ export class ApiError extends Error {
   }
 }
 
-const BASE = import.meta.env.VITE_API_BASE_URL ?? "/api";
+const BASE = (import.meta.env.VITE_API_BASE_URL ?? "/api").replace(/\/+$/, "");
 
 function defaultErrorCode(status: number): ApiErrorCode | "UNKNOWN_ERROR" {
   if (status === 400 || status === 422) return "VALIDATION_ERROR";
@@ -154,3 +154,7 @@ export const api = {
   createItem: (name: string) =>
     request<Item>("/items", { method: "POST", body: JSON.stringify({ name }) }),
 };
+
+export const createRealtimeSession = api.createRealtimeSession;
+export const createAlert = api.createAlert;
+export const listAlerts = api.listAlerts;

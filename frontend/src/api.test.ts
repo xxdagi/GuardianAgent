@@ -3,6 +3,9 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 import {
   ApiError,
   api,
+  createAlert,
+  createRealtimeSession,
+  listAlerts,
   type AlertCreateRequest,
   type AlertListItem,
   type AlertResponse,
@@ -179,5 +182,51 @@ describe("frontend api client (C3)", () => {
     const [firstCallPath] = vi.mocked(globalThis.fetch).mock.calls[0] ?? [];
     expect(firstCallPath).toBe("/api/alerts");
     expect(String(firstCallPath)).not.toContain("/api/v1");
+  });
+
+  it("supports standalone named exports createRealtimeSession and createAlert", async () => {
+    mockFetchJson(
+      {
+        clientSecret: "ek_standalone",
+        expiresAt: "2026-10-03T20:15:00Z",
+        model: "gpt-realtime",
+      },
+      201,
+    );
+
+    const session = await createRealtimeSession({
+      sessionId: "session-standalone",
+      language: "pl",
+      alertPhrases: ["pomoc"],
+      emergencyPhrases: ["ratunku"],
+    });
+
+    expect(session.clientSecret).toBe("ek_standalone");
+
+    mockFetchJson(
+      {
+        id: "alert-standalone",
+        mapsUrl: "https://maps.google.com/?q=0,0",
+        deliveries: [{ channel: "mock", status: "sent" }],
+        createdAt: "2026-10-03T20:20:00Z",
+      },
+      201,
+    );
+
+    const alert = await createAlert({
+      sessionId: "session-standalone",
+      level: "alert",
+      source: "manual",
+      language: "pl",
+      recipientName: "Test",
+      recipientPhone: "+48123456789",
+      location: null,
+    });
+
+    expect(alert.id).toBe("alert-standalone");
+
+    mockFetchJson([], 200);
+    const alerts = await listAlerts();
+    expect(alerts).toEqual([]);
   });
 });
