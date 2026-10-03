@@ -10,16 +10,32 @@ import { PhoneMockupFrame } from "./components/layout/PhoneMockupFrame";
 import { useAppSettings } from "./hooks/useAppSettings";
 import { useScenarios } from "./hooks/useScenarios";
 import { useEmergencyCall } from "./hooks/useEmergencyCall";
+import { DispatcherDashboard } from "./dispatcher/DispatcherDashboard";
 import type { ActiveView } from "./types";
 
+function isDispatcherRoute(): boolean {
+  if (typeof window === "undefined") return false;
+  const path = window.location.pathname.toLowerCase();
+  const params = new URLSearchParams(window.location.search);
+  return (
+    path === "/dispatcher" ||
+    path.startsWith("/dispatcher/") ||
+    params.get("view") === "dispatcher" ||
+    window.location.hash === "#/dispatcher"
+  );
+}
+
 export default function App() {
+  if (isDispatcherRoute()) {
+    return <DispatcherDashboard />;
+  }
+
   const [currentView, setCurrentView] = useState<ActiveView>(() => {
     if (typeof window !== "undefined") {
       const path = window.location.pathname.toLowerCase();
       const params = new URLSearchParams(window.location.search);
       if (
         path.includes("/sms") ||
-        path.includes("/dispatcher") ||
         params.get("view") === "sms" ||
         window.location.port === "3001"
       ) {
