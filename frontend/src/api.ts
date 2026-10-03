@@ -153,8 +153,19 @@ export const api = {
   listItems: () => request<Item[]>("/items"),
   createItem: (name: string) =>
     request<Item>("/items", { method: "POST", body: JSON.stringify({ name }) }),
+  getElevenLabsSignedUrl: async (): Promise<string | null> => {
+    try {
+      const data = await request<{ signedUrl: string }>("/elevenlabs/signed-url");
+      return data.signedUrl;
+    } catch (err) {
+      console.warn("Could not retrieve ElevenLabs signed URL from BFF:", err);
+      return null;
+    }
+  },
 };
 
 export const createRealtimeSession = api.createRealtimeSession;
 export const createAlert = api.createAlert;
 export const listAlerts = api.listAlerts;
+export const getElevenLabsSignedUrl = api.getElevenLabsSignedUrl;
+

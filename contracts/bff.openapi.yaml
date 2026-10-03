@@ -69,6 +69,20 @@ paths:
                   $ref: "#/components/schemas/AlertListItem"
         "502":
           $ref: "#/components/responses/Error"
+  /api/elevenlabs/signed-url:
+    get:
+      summary: Get ElevenLabs Conversational AI signed URL
+      responses:
+        "200":
+          description: Signed URL retrieved
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ElevenLabsSignedUrlResponse"
+        "500":
+          $ref: "#/components/responses/Error"
+        "502":
+          $ref: "#/components/responses/Error"
 components:
   responses:
     Error:
@@ -83,6 +97,13 @@ components:
       required: [status]
       properties:
         status: { type: string, example: ok }
+    ElevenLabsSignedUrlResponse:
+      type: object
+      required: [signedUrl]
+      properties:
+        signedUrl:
+          type: string
+          description: Ephemeral WebSocket URL for ElevenLabs Conversational AI session.
     RealtimeSessionCreate:
       type: object
       required: [sessionId, language, alertPhrases, emergencyPhrases]

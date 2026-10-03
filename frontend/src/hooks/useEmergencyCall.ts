@@ -1,5 +1,6 @@
 import { useState, useRef, useEffect } from "react";
 import { speechService } from "../services/speech";
+import { elevenLabsService } from "../services/elevenlabs";
 import { geoService, type GeoCoordinates } from "../services/geolocation";
 import { useSafetyMonitor } from "../safety/useSafetyMonitor";
 import type { SafetySettings } from "../types/settings";
@@ -173,22 +174,40 @@ export function useEmergencyCall({
   };
 
   // Start active conversation
-  const startActiveCall = () => {
+  const startActiveCall = async () => {
     cancelSchedule();
     onNavigate("connected");
     setEmergencyTriggered(false);
     setAlertDetails(null);
     setTranscript("");
 
-    // Speak initial persona greeting
-    setTimeout(() => {
-      speechService.speak(selectedScenario.initialGreeting);
-    }, 600);
+    // Try starting ElevenLabs conversational agent
+    const elevenLabsStarted = await elevenLabsService.startConversation({
+      onTranscript: (line) => {
+        setTranscript((prev) => (prev ? `${prev}\n${line}` : line));
+      },
+      onEmergencyTriggered: (reason) => {
+        executeEmergencyAlert(reason);
+      },
+      onError: () => {
+        // Fallback to local speech synthesis if ElevenLabs fails
+        speechService.speak(selectedScenario.initialGreeting);
+      },
+    });
+
+    if (!elevenLabsStarted) {
+      // Fallback: Speak initial persona greeting via Web Speech API
+      setTimeout(() => {
+        speechService.speak(selectedScenario.initialGreeting);
+      }, 600);
+    }
 
     // Start background speech recognition and forward transcripts directly to C4
     speechService.startListening(
       (newTranscript, isFinal) => {
-        setTranscript(newTranscript);
+        if (!elevenLabsStarted) {
+          setTranscript(newTranscript);
+        }
         handleUserTranscript(newTranscript, isFinal);
       },
       () => {
@@ -199,6 +218,7 @@ export function useEmergencyCall({
 
   // End active call
   const endActiveCall = () => {
+    elevenLabsService.endConversation();
     speechService.stopListening();
     speechService.cancelSpeech();
     onNavigate("home");

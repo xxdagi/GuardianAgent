@@ -25,3 +25,5 @@ coverage/
 .idea/
 .vscode/
 *.log
+docs/*.html
+docs/*_files/
