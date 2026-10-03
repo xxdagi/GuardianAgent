@@ -13,10 +13,11 @@ class Settings(BaseSettings):
     elevenlabs_api_key: str = ""
     elevenlabs_voice_id: str = "21m00Tcm4TlvDq8ikWAM"  # Rachel (warm female voice)
 
-    # (Optional fallback) OpenAI Realtime API settings
+    # Legacy fields for existing B4 tests/endpoints (not used in primary Gemini + ElevenLabs stack)
     openai_api_key: str = ""
     openai_realtime_model: str = "gpt-4o-realtime-preview"
     openai_realtime_voice: str = "alloy"
+
 
     # Alert notification provider (mock simulates SMS and feeds live dispatcher dashboard)
     # Exclusively mock is used for the hackathon demo
