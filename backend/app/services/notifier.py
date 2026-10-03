@@ -1,6 +1,15 @@
+import logging
 from typing import Protocol
 
 from app.models import AlertCreate, Delivery
+
+logger = logging.getLogger("guardian.notifier")
+
+
+def _mask_phone(phone: str) -> str:
+    if len(phone) > 6:
+        return phone[:5] + "***" + phone[-3:]
+    return phone
 
 
 class NotifierProtocol(Protocol):
@@ -20,7 +29,16 @@ class MockNotifier:
         maps_url: str,
         simulated_message: str,
     ) -> list[Delivery]:
-        _ = (alert_data, maps_url, simulated_message)
+        logger.info(
+            "mock alert dispatched",
+            extra={
+                "recipient_phone": _mask_phone(alert_data.recipient_phone),
+                "level": alert_data.level,
+                "source": alert_data.source,
+                "maps_url": maps_url,
+                "message_preview": simulated_message[:80],
+            },
+        )
         return [Delivery(channel="mock", status="sent")]
 
 

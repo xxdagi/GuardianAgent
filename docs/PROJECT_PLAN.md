@@ -64,18 +64,12 @@ Code phrases sound natural in a conversation, so an attacker does not notice the
 
 ## 3. Alert channel - which SMS provider? (decide by H+3)
 
-| | **Twilio** (trial) | **SMSAPI.pl** (test account) | **Telegram bot** |
-|---|---|---|---|
-| Real SMS | Yes | Yes | No (push message in Telegram) |
-| Automated **voice call** to the contact | **Yes** (same account, text-to-speech message) | No (SMS-focused) | No |
-| Free tier | Trial credit (~15 USD), expires after ~30 days | ~50 free test SMS (check on registration) | Free, unlimited |
-| Restrictions | Only to **verified numbers** (verify 1-2 team phones - fine for the demo). Messages prefixed "Sent from your Twilio trial account". Sender is a Twilio number (no custom sender name on trial). Enable **Poland** in Messaging/Voice Geo Permissions. | Registration targets **companies** (company data may be required - a risk for students). Custom sender name (max 11 chars, no Polish letters) needs activation first. | Recipient must start a chat with the bot first. |
-| Integration | REST (`httpx`) or `twilio` SDK | Simple REST (`httpx`), PDF section 3.2 | One REST call (`httpx`), PDF section 6 |
-| Setup time | ~20-30 min | ~15 min if registration works | ~5 min |
+## 3. Alert strategy for Hackathon: Mock Notifier + Live Dispatcher Dashboard
 
-**Recommendation:** **Twilio as the main provider.** One account covers both actions from the original idea: SMS with location **and** "call a number". The trial limits don't matter for a demo with verified team phones. **Telegram as a zero-risk fallback**, set up in the first hour. Mention **SMSAPI.pl** in the pitch as the production choice for Poland (Polish sender name, local pricing).
-
-Spike (Person B, task B3): create the Twilio trial, verify a team phone, send one SMS and one call to a Polish number. If it doesn't work by **H+3**, switch the demo to Telegram and move on.
+For the hackathon demo, we use a **Mock Notifier paired with a Live Dispatcher Dashboard** (projector/laptop screen):
+- **Zero Telecom Friction**: No need to register paid SMS gateways, verify phone numbers on Twilio trial, or worry about SMS carrier delays in a crowded venue.
+- **Superior Jury Presentation**: While the user talks on their phone, the projector screen at `/dispatcher` instantly catches the alert in real time with GPS coordinates, Google Maps link, simulated SMS payload, and speech transcript.
+- **Clean Architecture**: Backend uses the Strategy pattern (`Notifier` protocol). `ALERT_PROVIDER=mock` is the robust default. An optional `ALERT_PROVIDER=telegram` is available as a free push fallback without altering business logic.
 
 ---
 
@@ -95,8 +89,8 @@ flowchart LR
   AL -->|POST /api/alerts| BFF
   BFF -->|/api/v1/...| BE[backend :8000]
   BE -->|client_secrets| OAI
-  BE --> NOTIF[(Twilio SMS/voice or Telegram)]
-  NOTIF --> TC[Trusted contact phone]
+  BE --> NOTIF[(Mock Notifier & Live Alerts Feed)]
+  NOTIF --> DISP[Live Dispatcher Dashboard / Projector]
 ```
 
 ### Call start sequence
@@ -255,7 +249,7 @@ Each area owns its own folders to avoid merge conflicts (see [workflow skill](ag
 | Question | Decision |
 |----------|----------|
 | LLM / voice | OpenAI Realtime (`gpt-realtime` family) via WebRTC |
-| Alert channel | Recommended Twilio (SMS + voice), Telegram fallback, SMSAPI.pl as production note - **confirm after spike B3 (H+3)** |
+| Alert channel | Mock Notifier + Live Dispatcher Dashboard (100% demo-proof, zero external telecom friction; optional Telegram fallback) |
 | Language | Polish and English (setting) |
 | Persona | Mom |
 | Name | Guardian Agent |
