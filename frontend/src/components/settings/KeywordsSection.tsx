@@ -30,11 +30,7 @@ export const KeywordsSection: React.FC<KeywordsSectionProps> = ({
   };
 
   return (
-    <div
-      className={`border-2 rounded-2xl p-4 mb-6 transition-all shadow-[0_2px_0_0_#c0d4ed] ${
-        isDark ? "bg-[#18222e] border-[#9cadc0]/60" : "bg-[#f0f5fc]/70 border-[#9cadc0]/50"
-      }`}
-    >
+    <div className="card-tactile mb-6">
       <div className="flex items-center space-x-2 text-xs font-black mb-1 text-[#1c2b39] dark:text-[#c0d4ed]">
         <AlertTriangle className="w-4 h-4 text-[#9cadc0] dark:text-[#c0d4ed]" />
         <span>{getTranslation(language, "keywordsTitle")}</span>
@@ -55,7 +51,7 @@ export const KeywordsSection: React.FC<KeywordsSectionProps> = ({
               <button
                 onClick={() => onRemoveKeyword(kw)}
                 className="ml-1.5 p-0.5 hover:text-red-500 rounded-full transition-colors"
-                aria-label={`Usuń ${kw}`}
+                aria-label={getTranslation(language, "deleteKeywordAria", { kw })}
               >
                 <X className="w-3.5 h-3.5" />
               </button>
@@ -81,9 +77,7 @@ export const KeywordsSection: React.FC<KeywordsSectionProps> = ({
           value={newKeyword}
           onChange={(e) => setNewKeyword(e.target.value)}
           placeholder={getTranslation(language, "addKeywordPlaceholder")}
-          className={`flex-1 border-2 rounded-xl px-3 py-2 text-xs font-bold focus:outline-none focus:border-[#9cadc0] ${
-            isDark ? "bg-[#0f1720] border-[#9cadc0]/50 text-[#c0d4ed]" : "bg-white border-[#9cadc0]/50 text-[#1c2b39]"
-          }`}
+          className="flex-1 input-tactile"
         />
         <button
           type="submit"

@@ -24,11 +24,7 @@ export const CallControlsGrid: React.FC<CallControlsGridProps> = ({
       <div className="flex flex-col items-center">
         <button
           onClick={onToggleMute}
-          className={`w-16 h-16 rounded-full flex items-center justify-center transition-all ${
-            isMuted
-              ? "bg-white text-black"
-              : "bg-neutral-800/80 text-white active:bg-neutral-700 border border-neutral-700/50"
-          }`}
+          className={`ios-call-btn ${isMuted ? "ios-call-btn-active" : ""}`}
         >
           {isMuted ? <MicOff className="w-7 h-7" /> : <Mic className="w-7 h-7" />}
         </button>
@@ -39,7 +35,7 @@ export const CallControlsGrid: React.FC<CallControlsGridProps> = ({
 
       {/* Keypad */}
       <div className="flex flex-col items-center">
-        <button className="w-16 h-16 rounded-full bg-neutral-800/80 active:bg-neutral-700 border border-neutral-700/50 flex items-center justify-center text-white transition-all">
+        <button className="ios-call-btn">
           <Grid className="w-7 h-7" />
         </button>
         <span className="text-xs text-neutral-300 mt-2 font-light">
@@ -51,11 +47,7 @@ export const CallControlsGrid: React.FC<CallControlsGridProps> = ({
       <div className="flex flex-col items-center">
         <button
           onClick={onToggleSpeaker}
-          className={`w-16 h-16 rounded-full flex items-center justify-center transition-all ${
-            isSpeaker
-              ? "bg-white text-black"
-              : "bg-neutral-800/80 text-white active:bg-neutral-700 border border-neutral-700/50"
-          }`}
+          className={`ios-call-btn ${isSpeaker ? "ios-call-btn-active" : ""}`}
         >
           <Volume2 className="w-7 h-7" />
         </button>
@@ -66,7 +58,7 @@ export const CallControlsGrid: React.FC<CallControlsGridProps> = ({
 
       {/* Add Call */}
       <div className="flex flex-col items-center">
-        <button className="w-16 h-16 rounded-full bg-neutral-800/80 active:bg-neutral-700 border border-neutral-700/50 flex items-center justify-center text-white transition-all">
+        <button className="ios-call-btn">
           <UserPlus className="w-7 h-7" />
         </button>
         <span className="text-xs text-neutral-300 mt-2 font-light">
@@ -76,15 +68,17 @@ export const CallControlsGrid: React.FC<CallControlsGridProps> = ({
 
       {/* FaceTime / Video */}
       <div className="flex flex-col items-center">
-        <button className="w-16 h-16 rounded-full bg-neutral-800/80 active:bg-neutral-700 border border-neutral-700/50 flex items-center justify-center text-white transition-all">
+        <button className="ios-call-btn">
           <Video className="w-7 h-7" />
         </button>
-        <span className="text-xs text-neutral-300 mt-2 font-light">FaceTime</span>
+        <span className="text-xs text-neutral-300 mt-2 font-light">
+          {getTranslation(language, "videoCall")}
+        </span>
       </div>
 
       {/* Contacts */}
       <div className="flex flex-col items-center">
-        <button className="w-16 h-16 rounded-full bg-neutral-800/80 active:bg-neutral-700 border border-neutral-700/50 flex items-center justify-center text-white transition-all">
+        <button className="ios-call-btn">
           <User className="w-7 h-7" />
         </button>
         <span className="text-xs text-neutral-300 mt-2 font-light">
