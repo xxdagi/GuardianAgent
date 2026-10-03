@@ -7,9 +7,12 @@ Read these before changing anything. They are mandatory.
 3. **Workflow** - [docs/agents/skills/workflow.md](docs/agents/skills/workflow.md)
 4. **Architecture** - [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md)
 5. **Setup, run, test** - [docs/SETUP.md](docs/SETUP.md)
+6. **Agent Behavior & Safety** - [docs/agents/skills/agent-behavior.md](docs/agents/skills/agent-behavior.md)
 
 ## Hard rules (summary)
 
+- ALWAYS read `contracts/*.yaml` before modifying code. NEVER guess API structures.
+- IF a task is ambiguous, STOP and ask the user. Do not hallucinate business logic.
 - NEVER print, log, commit, paste or send secrets (API keys, tokens, passwords, `.env` contents).
 - NEVER read `.env` files unless the user explicitly asks; use `.env.example` for variable names.
 - Services are independent: `frontend` -> `bff` -> `backend`. No cross-folder imports. Frontend never calls `backend` directly.
