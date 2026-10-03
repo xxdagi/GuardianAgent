@@ -52,6 +52,9 @@ Create the venv only once. Afterwards just activate it: `. backend/.venv/bin/act
 | `CORS_ORIGINS` | `http://localhost:4000` | Allowed origin for Backend |
 | `APP_ENV` | `development` | Environment name |
 
+> **⚠️ Note for teammates & testers:** 
+> Without `ELEVENLABS_API_KEY` and `ELEVENLABS_AGENT_ID`, the app will still start and run locally, but the voice assistant will fall back to a robotic-sounding browser speech synthesizer. **For the full, realistic "SafeCall" experience, ask the project author for their API keys** (or provide your own) and paste them into your `.env` file!
+
 ## 4. Run locally (3 terminals)
 
 ```bash

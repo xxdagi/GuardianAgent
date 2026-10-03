@@ -28,8 +28,7 @@ make dev     # starts backend, bff, and frontend concurrently in ONE terminal!
 - Open app: **http://localhost:5173**
 - Open recipient SMS phone: **http://localhost:5173/sms** (or `make sms` on port 3001)
 
-*(Works 100% out of the box with zero external configuration using built-in speech synthesis and local mock SMS. To enable ElevenLabs conversational AI agent, provide your `ELEVENLABS_API_KEY` and `ELEVENLABS_AGENT_ID` in the root `.env`).*
-
+> **⚠️ IMPORTANT:** To experience the real, fully working AI voice agent, you must obtain the API keys from the repository author (or create your own) and paste them into your `.env` file. Without them, the app works but falls back to a robotic, offline browser speech synthesizer.
 Or: `make up` (Docker).
 
 ## Tests
