@@ -29,11 +29,7 @@ export const EmergencyContactSection: React.FC<EmergencyContactSectionProps> = (
   };
 
   return (
-    <div
-      className={`border-2 rounded-2xl p-4 mb-6 transition-all shadow-[0_2px_0_0_#c0d4ed] ${
-        isDark ? "bg-[#18222e] border-[#9cadc0]/60" : "bg-[#f0f5fc]/70 border-[#9cadc0]/50"
-      }`}
-    >
+    <div className="card-tactile mb-6">
       <div className="flex items-center justify-between mb-3">
         <div className="flex items-center space-x-2 text-xs font-black text-[#1c2b39] dark:text-[#c0d4ed]">
           <Phone className="w-4 h-4 text-[#9cadc0] dark:text-[#c0d4ed]" />
@@ -56,10 +52,8 @@ export const EmergencyContactSection: React.FC<EmergencyContactSectionProps> = (
               type="text"
               value={contactName}
               onChange={(e) => setContactName(e.target.value)}
-              placeholder="np. Tomek"
-              className={`w-full border-2 rounded-xl px-3 py-2 text-xs font-bold focus:outline-none focus:border-[#9cadc0] ${
-                isDark ? "bg-[#0f1720] border-[#9cadc0]/50 text-[#c0d4ed]" : "bg-white border-[#9cadc0]/50 text-[#1c2b39]"
-              }`}
+              placeholder={getTranslation(language, "contactNamePlaceholder")}
+              className="input-tactile py-2"
             />
           </div>
           <div>
@@ -70,10 +64,8 @@ export const EmergencyContactSection: React.FC<EmergencyContactSectionProps> = (
               type="tel"
               value={contactPhone}
               onChange={(e) => setContactPhone(e.target.value)}
-              placeholder="+48 600 000 000"
-              className={`w-full border-2 rounded-xl px-3 py-2 text-xs font-bold focus:outline-none focus:border-[#9cadc0] ${
-                isDark ? "bg-[#0f1720] border-[#9cadc0]/50 text-[#c0d4ed]" : "bg-white border-[#9cadc0]/50 text-[#1c2b39]"
-              }`}
+              placeholder={getTranslation(language, "contactPhonePlaceholder")}
+              className="input-tactile py-2"
             />
           </div>
         </div>
