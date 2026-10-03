@@ -2,7 +2,7 @@
 
 HackYeah 2026 | 22 h | team of 3
 
-Inputs used: [localisation.md](localisation.md), [research_wykrywanie_slowa.md](research_wykrywanie_slowa.md), [dane-wyjściowe.pdf](dane-wyjściowe.pdf), [ARCHITECTURE.md](ARCHITECTURE.md), [api-contracts skill](agents/skills/api-contracts.md), OpenAI Realtime docs ([WebRTC guide](https://platform.openai.com/docs/guides/realtime-webrtc), [conversations guide](https://platform.openai.com/docs/guides/realtime-conversations)).
+Inputs used: [localisation.md](localisation.md), [research_wykrywanie_slowa.md](research_wykrywanie_slowa.md), [dane-wyjściowe.pdf](dane-wyjściowe.pdf), [ARCHITECTURE.md](ARCHITECTURE.md), [api-contracts skill](agents/skills/api-contracts.md).
 
 Day 1 task list: [tasks/day-1.md](tasks/day-1.md) | Day 2 task list: [tasks/day-2.md](tasks/day-2.md) | Demo Script: [DEMO.md](DEMO.md)
 
@@ -12,7 +12,7 @@ Day 1 task list: [tasks/day-1.md](tasks/day-1.md) | Day 2 task list: [tasks/day-
 
 You feel unsafe in a public place (walking home at night, someone is following you) and want to "be on the phone with someone".
 
-Guardian Agent is a mobile-styled web app that **imitates a real phone call with "Mom"** - an AI voice agent (OpenAI Realtime) that talks back naturally in **Polish or English**. Anyone nearby sees and hears a normal phone call. While you talk, the app listens for **secret code phrases**:
+Guardian Agent is a mobile-styled web app that **imitates a real phone call with "Mom"** - an AI voice agent (powered by Gemini Flash reasoning & ElevenLabs voice) that talks back naturally in **Polish or English**. Anyone nearby sees and hears a normal phone call. While you talk, the app listens for **secret code phrases**:
 
 | Level | Example phrase (configurable) | Action (silent, call continues) |
 |-------|-------------------------------|--------------------------------|
@@ -27,7 +27,7 @@ Code phrases sound natural in a conversation, so an attacker does not notice the
 
 1. Setup screen: language (PL/EN), trusted contact (name + phone), code phrases, emergency number. Saved in `localStorage`. Persona is fixed: **Mom**.
 2. Fake call screen (incoming call -> active call with timer, avatar, hang-up, SOS).
-3. Voice conversation with Mom via **OpenAI Realtime API over WebRTC** (speech-to-speech, low latency).
+3. Voice conversation with Mom: reasoning powered by **Google Gemini Flash** (fast, zero-cost, no credit card required) paired with ultra-realistic **ElevenLabs** voice synthesis (warm Mom voice in PL/EN).
 4. Code phrase detection - two layers (see D3).
 5. Continuous GPS tracking (`watchPosition`, latest value kept in `useRef`).
 6. Silent alert: `frontend -> bff -> backend -> SMS provider`.
@@ -46,15 +46,15 @@ Code phrases sound natural in a conversation, so an attacker does not notice the
 
 | # | Decision | Why |
 |---|----------|-----|
-| D1 | Follow repo architecture: **frontend (React) -> bff (Node/TS) -> backend (Python/FastAPI)**. OpenAI key, SMS provider and prompts live in the **Python backend** (not Node as in `localisation.md`). | Repo rules: secrets and third-party integrations live in the backend. |
-| D2 | **OpenAI Realtime API with WebRTC + ephemeral key.** The backend creates a short-lived client secret (`POST https://api.openai.com/v1/realtime/client_secrets`) with the full session config (model, voice, Mom instructions, transcription, tools). The browser uses it to open a WebRTC connection (`POST https://api.openai.com/v1/realtime/calls` with the SDP offer). Audio flows browser <-> OpenAI directly; JSON events flow over the `oai-events` data channel. | Officially recommended browser pattern. The real API key never reaches the browser. Low latency, built-in echo cancellation and turn detection. The Web Speech API from the research doc is no longer needed. |
+| D1 | Follow repo architecture: **frontend (React) -> bff (Node/TS) -> backend (Python/FastAPI)**. Model keys, ElevenLabs, and prompts live in the **Python backend** (not Node as in `localisation.md`). | Repo rules: secrets and third-party integrations live in the backend. |
+| D2 | **LLM Reasoning via Google Gemini Flash + Voice via ElevenLabs (Zero Credit Card Required).** <br>• **Reasoning:** Google Gemini 2.0 Flash / 1.5 Flash via Google AI Studio. 100% free tier (15 requests/min), requires **no credit card**. Super fast response (~200–300 ms) and handles tool calling for `trigger_alert`. <br>• **Voice:** ElevenLabs Text-to-Speech (`eleven_multilingual_v2` / Conversational AI). Free tier provides 10,000 characters/month with **no credit card required**, generating an ultra-realistic, warm Mom persona in Polish and English. | Guarantees the team is never blocked by credit card requirements, paid subscriptions, or billing limits during the hackathon. Best-in-class voice realism paired with free, reliable reasoning. |
 | D3 | **Two-layer code phrase detection:** (1) **deterministic** - the session has input audio transcription enabled; the frontend runs every user transcript through our keyword detector (lowercase, no diacritics, phrase match). (2) **AI** - the session defines a tool `trigger_alert({ level, reason })`; Mom's instructions list the code phrases and tell her to call the tool when she hears them (or clear distress), then keep talking casually. Both layers go to one alert function with a cooldown, so there are no duplicates. | Layer 1 is predictable and testable. Layer 2 catches paraphrases and transcription errors ("nakarmiłaś kota?" vs "nakarmiłeś kota"). |
 | D4 | **Mom never reveals the alert.** After a tool call the frontend returns `function_call_output` (`{"ok": true}`) and Mom continues the normal conversation. | The disguise must hold. |
 | D5 | **Geolocation via `navigator.geolocation.watchPosition`** with `enableHighAccuracy`, value in `useRef`, `clearWatch` on unmount. No reverse geocoding. | From `localisation.md`. |
 | D6 | **Silent alert must go through the backend.** Browsers cannot send SMS in the background (`sms:` opens the Messages app and breaks the disguise). | From `dane-wyjściowe.pdf`, section 1. |
 | D7 | Backend uses **Mock Notifier + Live Dispatcher Dashboard** (`ALERT_PROVIDER=mock`). Telegram was evaluated and removed as unnecessary per product decision to keep the stack 100% demo-proof and focused on the dispatcher dashboard. | The demo is never blocked by external provider accounts or telecom networks. |
 | D8 | **Language**: setting `pl` / `en`. It controls Mom's instructions, the transcription language hint and the UI labels (small dictionary, no i18n library). | Requirement: Polish / English. |
-| D9 | Realtime model is configurable via env (`OPENAI_REALTIME_MODEL`). Use the cheaper/mini realtime model while developing, the best one for the demo. **Set a monthly spend limit in the OpenAI dashboard.** | Realtime audio is the most expensive part of the stack. |
+| D9 | **Zero-Cost & Spend Safety:** Gemini Flash and ElevenLabs free tiers require no credit card and have zero spend risk. | No risk of sudden billing cutoffs during live judging. |
 | D10 | Settings stored client-side in `localStorage` and sent with requests. No accounts/auth. | Hackathon scope. |
 | D11 | For testing on a real phone use an **HTTPS tunnel** (`cloudflared` / `ngrok`) to the frontend. | Mic, GPS and WebRTC need a secure context (HTTPS) on mobile. |
 
@@ -234,7 +234,7 @@ Each area owns its own folders to avoid merge conflicts (see [workflow skill](ag
 
 | Milestone | Target | Definition |
 |-----------|--------|-----------|
-| M0 Kickoff | H+1 | Decisions confirmed, contracts merged, OpenAI key + spend limit set, everyone runs `make setup` + `make test` green. |
+| M0 Kickoff | H+1 | Decisions confirmed, contracts merged, Gemini + ElevenLabs configured, everyone runs `make setup` + `make test` green. |
 | M1 Standalone | H+4 | A: call UI + WebRTC talk with Mom. B: session + alert endpoints, provider spike decided. C: BFF routes + detector with tests. |
 | M2 Integrated | H+7 | End-to-end on the laptop: talk to Mom -> code phrase -> SMS (or Telegram) received with a map link. |
 | M3 Day 1 done | H+10/11 | Works on a real phone over the HTTPS tunnel, in PL and EN. Demo script rehearsed once. Everything merged to `main`. |
@@ -246,8 +246,9 @@ Each area owns its own folders to avoid merge conflicts (see [workflow skill](ag
 
 | Question | Decision |
 |----------|----------|
-| LLM / voice | OpenAI Realtime (`gpt-realtime` family) via WebRTC |
-| Alert channel | Mock Notifier + Live Dispatcher Dashboard (100% demo-proof, zero external telecom friction; optional Telegram fallback) |
+| LLM / reasoning | Google Gemini Flash (via Google AI Studio free tier - 100% free, zero credit card requirement) |
+| Voice / TTS | ElevenLabs (warm Mom persona in Polish & English - free tier, zero credit card requirement) |
+| Alert channel | Mock Notifier + Live Dispatcher Dashboard (100% demo-proof, zero external telecom friction) |
 | Language | Polish and English (setting) |
 | Persona | Mom |
 | Name | Guardian Agent |

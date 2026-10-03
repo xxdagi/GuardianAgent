@@ -27,14 +27,14 @@ HackYeah 2026 | Live Presentation & Demo Playbook
 1. **Presenter:** "Imagine walking home alone late at night. You notice someone following you. Taking out your phone and desperately dialing emergency numbers or tapping panic buttons can escalate danger instantly if noticed. What do we naturally do? We fake a phone call."
 2. **Action:** Presenter taps "Start Call" on the phone. The phone rings with "Mom" calling. Presenter answers.
 3. **Presenter:** "Halo mamo, cześć! Wracam właśnie do domu."
-4. **Mom (AI Agent via OpenAI Realtime):** "Cześć kochanie! Super, a którędy idziesz? Ciemno już na dworze."
+4. **Mom (AI Agent via Google Gemini Flash + ElevenLabs voice):** "Cześć kochanie! Super, a którędy idziesz? Ciemno już na dworze."
 5. **Presenter:** "Idę przez park, zaraz będę przy głównej ulicy."
 
 ### Act 2: Silent Alarm Trigger (1:00 - 1:45)
 1. **Presenter:** Without breaking character, seamlessly integrates the secret alert code phrase:
    *"Mamo, a powiedz mi, czy nakarmiłaś dzisiaj kota przed wyjściem?"*
 2. **What happens behind the scenes:**
-   - **Frontend:** Instant keyword detector matches the code phrase + OpenAI Realtime tool `trigger_alert` activates.
+   - **Frontend:** Instant keyword detector matches the code phrase + AI agent tool `trigger_alert` activates.
    - **GPS:** High-accuracy coordinates are bundled into a silent `POST /api/alerts` request.
    - **Mom:** Continues smoothly without pausing or revealing the alarm: *"Tak kochanie, nakarmiłam. Uważaj pod nogami i nie rozłączaj się."*
    - **Presenter's Phone:** Emits a single silent 200ms haptic vibration. The screen disguise remains unbroken.
