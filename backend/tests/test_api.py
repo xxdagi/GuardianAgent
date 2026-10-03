@@ -5,6 +5,7 @@ from app.exceptions import UpstreamError
 from app.main import app
 from app.routes import alerts as alerts_route
 from app.routes import realtime as realtime_route
+from app.services.notifier import MockNotifier, get_notifier
 
 client = TestClient(app)
 
@@ -119,7 +120,7 @@ def test_create_alert_provider_failure_returns_201_failed_delivery(monkeypatch):
     class FailedNotifier:
         async def dispatch(self, alert_data, maps_url, simulated_message):
             _ = (alert_data, maps_url, simulated_message)
-            return [{"channel": "sms", "status": "failed"}]
+            return [{"channel": "mock", "status": "failed"}]
 
     monkeypatch.setattr(alerts_route, "get_notifier", lambda: FailedNotifier())
     payload = {
@@ -135,7 +136,7 @@ def test_create_alert_provider_failure_returns_201_failed_delivery(monkeypatch):
     r = client.post("/api/v1/alerts", json=payload)
     assert r.status_code == 201
     data = r.json()
-    assert data["deliveries"] == [{"channel": "sms", "status": "failed"}]
+    assert data["deliveries"] == [{"channel": "mock", "status": "failed"}]
 
 
 def test_alert_validation_errors():
@@ -301,3 +302,43 @@ def test_list_alerts_shape_and_public_fields():
 def test_location_fields_are_required(payload):
     r = client.post("/api/v1/alerts", json=payload)
     assert r.status_code == 422
+def test_get_notifier_returns_mock():
+    assert isinstance(get_notifier(), MockNotifier)
+
+
+def test_list_alerts_contains_dispatcher_fields():
+    payload = {
+        "session_id": "session-dispatcher-check",
+        "level": "emergency",
+        "source": "keyword",
+        "trigger_phrase": "pomocy test",
+        "language": "pl",
+        "recipient_name": "Dyspozytor",
+        "recipient_phone": "+48555666777",
+        "location": {
+            "latitude": 50.0647,
+            "longitude": 19.9450,
+            "accuracy": 5.0,
+        },
+        "transcript_snippet": "To jest fragment rozmowy: pomocy test.",
+    }
+    r = client.post("/api/v1/alerts", json=payload)
+    assert r.status_code == 201
+
+    r_list = client.get("/api/v1/alerts")
+    assert r_list.status_code == 200
+    alerts = r_list.json()
+    assert len(alerts) > 0
+
+    latest = alerts[0]
+    assert latest["session_id"] == "session-dispatcher-check"
+    assert latest["level"] == "emergency"
+    assert latest["source"] == "keyword"
+    assert latest["trigger_phrase"] == "pomocy test"
+    assert latest["transcript_snippet"] == "To jest fragment rozmowy: pomocy test."
+    assert latest["location"]["latitude"] == 50.0647
+    assert latest["location"]["longitude"] == 19.9450
+    assert latest["location"]["accuracy"] == 5.0
+    assert "created_at" in latest
+    assert "deliveries" in latest
+    assert latest["deliveries"][0]["channel"] == "mock"

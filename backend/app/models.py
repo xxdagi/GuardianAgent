@@ -34,8 +34,11 @@ class Location(BaseModel):
 
 
 class Delivery(BaseModel):
-    channel: Literal["mock", "sms", "voice", "telegram"]
-    status: Literal["sent", "failed"]
+    channel: Literal["mock"] = "mock"
+    status: Literal["sent", "failed"] = "sent"
+
+
+DeliveryStatus = Delivery
 
 
 class AlertCreate(BaseModel):

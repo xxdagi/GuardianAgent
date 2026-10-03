@@ -173,7 +173,7 @@ components:
       properties:
         channel:
           type: string
-          enum: [mock, sms, voice, telegram]
+          enum: [mock]
           description: Delivery channel.
         status:
           type: string
