@@ -32,8 +32,8 @@ export const CallTriggerHero: React.FC<CallTriggerHeroProps> = ({
         className="call-3d-btn w-full min-h-[105px] px-5 py-4 group"
       >
         <div className="flex items-center space-x-3.5 text-left relative z-10 w-full">
-          <div className="w-13 h-13 sm:w-14 sm:h-14 rounded-2xl bg-[#c0d4ed] text-[#1c2b39] border-2 border-[#9cadc0] flex items-center justify-center shrink-0 shadow-inner group-hover:scale-105 transition-transform">
-            <PhoneCall className="w-7 h-7 text-[#1c2b39] animate-pulse" />
+          <div className="w-[60px] h-[60px] rounded-2xl bg-[#c0d4ed] text-[#1c2b39] border-2 border-[#9cadc0] flex items-center justify-center shrink-0 shadow-inner group-hover:scale-105 transition-transform">
+            <PhoneCall className="w-8 h-8 text-[#1c2b39] animate-pulse" />
           </div>
           <div className="flex-1 min-w-0">
             <span className="text-lg sm:text-xl font-black block tracking-tight text-[#1c2b39] dark:text-[#c0d4ed] leading-tight">
@@ -52,8 +52,8 @@ export const CallTriggerHero: React.FC<CallTriggerHeroProps> = ({
         className="call-3d-btn w-full min-h-[105px] px-5 py-4 group"
       >
         <div className="flex items-center space-x-3.5 text-left relative z-10 w-full">
-          <div className="w-13 h-13 sm:w-14 sm:h-14 rounded-2xl bg-[#c0d4ed] text-[#1c2b39] border-2 border-[#9cadc0] flex items-center justify-center shrink-0 shadow-inner group-hover:scale-105 transition-transform">
-            <Timer className="w-7 h-7 text-[#1c2b39]" />
+          <div className="w-[60px] h-[60px] rounded-2xl bg-[#c0d4ed] text-[#1c2b39] border-2 border-[#9cadc0] flex items-center justify-center shrink-0 shadow-inner group-hover:scale-105 transition-transform">
+            <Timer className="w-8 h-8 text-[#1c2b39]" />
           </div>
           <div className="flex-1 min-w-0">
             <span className="text-lg sm:text-xl font-black block tracking-tight text-[#1c2b39] dark:text-[#c0d4ed] leading-tight">
