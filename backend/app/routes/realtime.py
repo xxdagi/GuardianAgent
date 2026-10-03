@@ -3,7 +3,6 @@ from uuid import uuid4
 
 from fastapi import APIRouter
 
-from app.exceptions import UpstreamError
 from app.models import RealtimeSessionCreate, RealtimeSessionResponse
 
 router = APIRouter(prefix="/realtime", tags=["realtime"])
