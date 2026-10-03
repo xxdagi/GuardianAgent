@@ -41,4 +41,14 @@ export const api = {
       return false;
     }
   },
+  getElevenLabsSignedUrl: async (): Promise<string | null> => {
+    try {
+      const data = await request<{ signedUrl: string }>("/elevenlabs/signed-url");
+      return data.signedUrl;
+    } catch (err) {
+      console.warn("Could not retrieve ElevenLabs signed URL from BFF:", err);
+      return null;
+    }
+  },
 };
+

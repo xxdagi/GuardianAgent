@@ -316,4 +316,28 @@ describe("bff", () => {
     expect(res.status).toBe(502);
     expect(res.body.error.code).toBe("UPSTREAM_ERROR");
   });
+
+  it("returns 500 when ElevenLabs credentials are not configured", async () => {
+    const res = await request(createApp()).get("/api/elevenlabs/signed-url");
+    expect(res.status).toBe(500);
+    expect(res.body.error.code).toBe("CONFIG_ERROR");
+  });
+
+  it("fetches signed-url when ElevenLabs credentials are set", async () => {
+    const { config } = await import("./config.js");
+    config.elevenLabsApiKey = "test-api-key";
+    config.elevenLabsAgentId = "test-agent-id";
+
+    vi.spyOn(globalThis, "fetch").mockResolvedValue({
+      ok: true,
+      json: async () => ({ signed_url: "wss://api.elevenlabs.io/test-signed-url" }),
+    } as unknown as Response);
+
+    const res = await request(createApp()).get("/api/elevenlabs/signed-url");
+    expect(res.status).toBe(200);
+    expect(res.body.signedUrl).toBe("wss://api.elevenlabs.io/test-signed-url");
+
+    config.elevenLabsApiKey = "";
+    config.elevenLabsAgentId = "";
+  });
 });
