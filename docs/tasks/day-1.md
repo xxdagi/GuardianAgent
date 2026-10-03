@@ -87,29 +87,30 @@ Docs: [Realtime WebRTC guide](https://platform.openai.com/docs/guides/realtime-w
 Owns: `backend/`. Branches: `feat/backend-realtime`, `feat/backend-alerts`.
 
 ### B1. Config and structure - H+0:45 -> H+1:15
-- [ ] Split `app/main.py` into `app/routes/`, `app/services/`, `app/models.py` (keep the error handlers and `/health`).
-- [ ] Extend `app/config.py` and `backend/.env.example` with placeholders:
-  `OPENAI_API_KEY=`, `OPENAI_REALTIME_MODEL=` (mini model for dev), `OPENAI_REALTIME_VOICE=`,
-  `ALERT_PROVIDER=mock` (`mock|twilio|smsapi|telegram`), `TWILIO_ACCOUNT_SID=`, `TWILIO_AUTH_TOKEN=`, `TWILIO_PHONE_NUMBER=`, `SMSAPI_TOKEN=`, `TELEGRAM_BOT_TOKEN=`, `TELEGRAM_CHAT_ID=`.
-- [ ] Add `httpx` to `requirements.txt` (for OpenAI/Twilio/Telegram REST). Ask the team before adding any SDK.
-- **Done when:** `make test-backend` is still green.
+- [x] Split `app/main.py` into `app/routes/`, `app/services/`, `app/models.py` (keep the error handlers and `/health`).
+- [x] Extend `app/config.py` and `backend/.env.example` with placeholders:
+  `OPENAI_API_KEY=`, `OPENAI_REALTIME_MODEL=`, `OPENAI_REALTIME_VOICE=`,
+  `ALERT_PROVIDER=mock` (`mock|telegram`), `TELEGRAM_BOT_TOKEN=`, `TELEGRAM_CHAT_ID=`. (No Twilio/SMSAPI credentials required).
+- [x] Add `httpx` to `requirements.txt` (for OpenAI REST & optional Telegram).
+- [x] **Done when:** `make test-backend` and `make lint` are green.
 
 ### B2. Alerts endpoint with mock notifier - H+1:15 -> H+2:15 (needs C1)
-- [ ] Pydantic models exactly as in `contracts/backend.openapi.yaml`.
-- [ ] `POST /api/v1/alerts`: build `maps_url = f"https://maps.google.com/?q={lat:.6f},{lon:.6f}"` (or "location unavailable"), build the message in the alert's language, call the notifier (`alert` -> SMS, `emergency` -> SMS + voice call), store in memory, return 201 with `deliveries`.
-- [ ] `GET /api/v1/alerts`: newest first.
-- [ ] `Notifier` protocol (`send_sms`, `place_call`) + `MockNotifier` that records messages in memory. Never log full phone numbers or tokens.
-- [ ] Tests: valid -> 201; no location -> 201 with fallback text; invalid -> 422 unified error; provider error -> delivery `failed` (still 201).
+- [ ] Pydantic models in `backend/app/models.py` matching the alert schemas.
+- [ ] `Notifier` protocol (`send_sms`, `place_call`) + `MockNotifier` in `app/services/notifier.py`:
+  - Builds simulated SMS text with Google Maps link: `maps_url = f"https://maps.google.com/?q={lat:.6f},{lon:.6f}"` (or location unavailable fallback).
+  - Records the dispatched alert in in-memory storage for the Live Dispatcher Feed.
+  - Returns delivery status (`channel: "mock"`, `status: "sent"`). Never logs full phone numbers.
+- [ ] `POST /api/v1/alerts`: receives alert payload, calls notifier, stores in memory, returns 201 with delivery info.
+- [ ] `GET /api/v1/alerts`: returns list of alerts (newest first) for the Live Dispatcher Dashboard.
+- [ ] Tests in `test_api.py`: valid alert -> 201; no location -> 201 with fallback text; invalid payload -> 422 unified error.
+- **Done when:** `pytest` passes; C can consume `GET /api/v1/alerts` and `POST /api/v1/alerts`.
 
-### B3. Provider spike + real notifier - H+2:15 -> H+3:30 (decision deadline H+3)
-- [ ] Create a Twilio trial, buy/get a trial number, enable **Poland** in the SMS and Voice geo permissions, verify 1-2 team phones.
-- [ ] `TwilioNotifier` via REST (`httpx`, basic auth with SID/token, timeout ~5 s):
-  - SMS: `POST /2010-04-01/Accounts/{sid}/Messages.json`,
-  - voice (emergency): `POST /2010-04-01/Accounts/{sid}/Calls.json` with inline TwiML `<Response><Say language="pl-PL">...</Say></Response>` reading the alert + "location sent by SMS".
-- [ ] In parallel, as a fallback: `TelegramNotifier` (one `sendMessage` call, PDF section 6).
-- [ ] Provider factory from `ALERT_PROVIDER`. Tests with `httpx` mocked (no network in tests).
-- [ ] **Report the decision to the team** (Twilio works / Telegram fallback) and update [PROJECT_PLAN section 7](../PROJECT_PLAN.md#7-decisions-log).
-- **Done when:** a manual `curl` to the backend delivers an SMS (or Telegram message) to a team phone.
+### B3. Live Alerts Feed Polish & Optional Telegram Provider - H+2:15 -> H+3:30
+- [ ] Verify `GET /api/v1/alerts` contains all fields needed by the dispatcher (timestamp, trigger phrase, transcript snippet, map coordinates).
+- [ ] Implement `TelegramNotifier` as an optional push fallback if `ALERT_PROVIDER=telegram` (simple HTTP POST via `httpx`, PDF section 6).
+- [ ] Provider factory returning `MockNotifier` (default) or `TelegramNotifier`.
+- [ ] Tests with `httpx` mocked for Telegram provider.
+- **Done when:** manual `curl` to `POST /api/v1/alerts` returns 201 and immediately shows up in `GET /api/v1/alerts`.
 
 ### B4. Realtime session endpoint - H+3:30 -> H+5:00 (needs C1)
 - [ ] `POST /api/v1/realtime/session`: calls `POST https://api.openai.com/v1/realtime/client_secrets` with the server API key and a session config:
