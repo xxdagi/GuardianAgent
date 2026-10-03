@@ -28,8 +28,6 @@ export const AddConversationPage: React.FC<AddConversationPageProps> = ({
   const [customRole, setCustomRole] = useState("");
   const [customCallerName, setCustomCallerName] = useState("");
   const [customTopics, setCustomTopics] = useState("");
-  const [customGreeting, setCustomGreeting] = useState("");
-  const [customDeterrent, setCustomDeterrent] = useState("");
   const [successSaved, setSuccessSaved] = useState(false);
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -47,15 +45,13 @@ export const AddConversationPage: React.FC<AddConversationPageProps> = ({
       isCustom: true,
       avatarText: callerDisplayName.charAt(0).toUpperCase(),
       initialGreeting:
-        customGreeting.trim() ||
-        (language === "pl"
-          ? `Cześć! Tu ${customRole}. Gdzie jesteś? Czekam na Ciebie.`
-          : `Hey! It's ${customRole}. Where are you right now? I'm waiting for you.`),
+        language === "pl"
+          ? `Cześć! Tu ${callerDisplayName}. Gdzie jesteś? Czekam na Ciebie.`
+          : `Hey! It's ${callerDisplayName}. Where are you right now? I'm waiting for you.`,
       deterrentResponse:
-        customDeterrent.trim() ||
-        (language === "pl"
+        language === "pl"
           ? "Dobrze, to ja już zakładam buty i wychodzę przed klatkę, będę na dole za minutę!"
-          : "Alright, I'm putting on my shoes and coming down to meet you outside right now!"),
+          : "Alright, I'm putting on my shoes and coming down to meet you outside right now!",
     };
 
     onAddCustomScenario(newScenario);
@@ -135,37 +131,35 @@ export const AddConversationPage: React.FC<AddConversationPageProps> = ({
             />
           </div>
 
-          <div className="grid grid-cols-2 gap-3">
-            <div>
-              <label className="text-[11px] font-bold block mb-1.5 text-[#1c2b39] dark:text-[#c0d4ed]">
-                {getTranslation(language, "scenarioRoleLabel")} *
-              </label>
-              <input
-                type="text"
-                required
-                value={customRole}
-                onChange={(e) => setCustomRole(e.target.value)}
-                placeholder={getTranslation(language, "scenarioRolePlaceholder")}
-                className={`w-full border-2 rounded-xl px-3.5 py-2.5 text-xs font-bold focus:outline-none focus:border-[#9cadc0] ${
-                  isDark ? "bg-[#0f1720] border-[#9cadc0]/50 text-[#c0d4ed]" : "bg-white border-[#9cadc0]/50 text-[#1c2b39]"
-                }`}
-              />
-            </div>
+          <div>
+            <label className="text-[11px] font-bold block mb-1.5 text-[#1c2b39] dark:text-[#c0d4ed]">
+              {getTranslation(language, "scenarioRoleLabel")} *
+            </label>
+            <input
+              type="text"
+              required
+              value={customRole}
+              onChange={(e) => setCustomRole(e.target.value)}
+              placeholder={getTranslation(language, "scenarioRolePlaceholder")}
+              className={`w-full border-2 rounded-xl px-3.5 py-2.5 text-xs font-bold focus:outline-none focus:border-[#9cadc0] ${
+                isDark ? "bg-[#0f1720] border-[#9cadc0]/50 text-[#c0d4ed]" : "bg-white border-[#9cadc0]/50 text-[#1c2b39]"
+              }`}
+            />
+          </div>
 
-            <div>
-              <label className="text-[11px] font-bold block mb-1.5 text-[#1c2b39] dark:text-[#c0d4ed]">
-                {getTranslation(language, "callerNameLabel")}
-              </label>
-              <input
-                type="text"
-                value={customCallerName}
-                onChange={(e) => setCustomCallerName(e.target.value)}
-                placeholder={getTranslation(language, "callerNamePlaceholder")}
-                className={`w-full border-2 rounded-xl px-3.5 py-2.5 text-xs font-bold focus:outline-none focus:border-[#9cadc0] ${
-                  isDark ? "bg-[#0f1720] border-[#9cadc0]/50 text-[#c0d4ed]" : "bg-white border-[#9cadc0]/50 text-[#1c2b39]"
-                }`}
-              />
-            </div>
+          <div>
+            <label className="text-[11px] font-bold block mb-1.5 text-[#1c2b39] dark:text-[#c0d4ed]">
+              {getTranslation(language, "callerNameLabel")}
+            </label>
+            <input
+              type="text"
+              value={customCallerName}
+              onChange={(e) => setCustomCallerName(e.target.value)}
+              placeholder={getTranslation(language, "callerNamePlaceholder")}
+              className={`w-full border-2 rounded-xl px-3.5 py-2.5 text-xs font-bold focus:outline-none focus:border-[#9cadc0] ${
+                isDark ? "bg-[#0f1720] border-[#9cadc0]/50 text-[#c0d4ed]" : "bg-white border-[#9cadc0]/50 text-[#1c2b39]"
+              }`}
+            />
           </div>
 
           <div>
@@ -181,38 +175,6 @@ export const AddConversationPage: React.FC<AddConversationPageProps> = ({
                 isDark ? "bg-[#0f1720] border-[#9cadc0]/50 text-[#c0d4ed]" : "bg-white border-[#9cadc0]/50 text-[#1c2b39]"
               }`}
             />
-          </div>
-
-          <div className="space-y-3 pt-1">
-            <div>
-              <label className="text-[11px] font-bold block mb-1 text-[#1c2b39]/80 dark:text-[#c0d4ed]/80">
-                {getTranslation(language, "scenarioGreetingLabel")}
-              </label>
-              <input
-                type="text"
-                value={customGreeting}
-                onChange={(e) => setCustomGreeting(e.target.value)}
-                placeholder={getTranslation(language, "scenarioGreetingPlaceholder")}
-                className={`w-full border-2 rounded-xl px-3.5 py-2 text-xs font-bold focus:outline-none focus:border-[#9cadc0] ${
-                  isDark ? "bg-[#0f1720] border-[#9cadc0]/50 text-[#c0d4ed]" : "bg-white border-[#9cadc0]/50 text-[#1c2b39]"
-                }`}
-              />
-            </div>
-
-            <div>
-              <label className="text-[11px] font-bold block mb-1 text-[#1c2b39]/80 dark:text-[#c0d4ed]/80">
-                {getTranslation(language, "scenarioDeterrentLabel")}
-              </label>
-              <input
-                type="text"
-                value={customDeterrent}
-                onChange={(e) => setCustomDeterrent(e.target.value)}
-                placeholder={getTranslation(language, "scenarioDeterrentPlaceholder")}
-                className={`w-full border-2 rounded-xl px-3.5 py-2 text-xs font-bold focus:outline-none focus:border-[#9cadc0] ${
-                  isDark ? "bg-[#0f1720] border-[#9cadc0]/50 text-[#c0d4ed]" : "bg-white border-[#9cadc0]/50 text-[#1c2b39]"
-                }`}
-              />
-            </div>
           </div>
 
           <button
