@@ -106,11 +106,11 @@ Owns: `backend/`. Branches: `feat/backend-realtime`, `feat/backend-alerts`.
 - [x] **Done when:** `pytest` passes; C can consume `GET /api/v1/alerts` and `POST /api/v1/alerts`.
 
 ### B3. Live Alerts Feed Polish & Optional Telegram Provider - H+2:15 -> H+3:30
-- [ ] Verify `GET /api/v1/alerts` contains all fields needed by the dispatcher (timestamp, trigger phrase, transcript snippet, map coordinates).
-- [ ] Implement `TelegramNotifier` as an optional push fallback if `ALERT_PROVIDER=telegram` (simple HTTP POST via `httpx`, PDF section 6).
-- [ ] Provider factory returning `MockNotifier` (default) or `TelegramNotifier`.
-- [ ] Tests with `httpx` mocked for Telegram provider.
-- **Done when:** manual `curl` to `POST /api/v1/alerts` returns 201 and immediately shows up in `GET /api/v1/alerts`.
+- [x] Verify `GET /api/v1/alerts` contains all fields needed by the dispatcher (timestamp, trigger phrase, transcript snippet, map coordinates).
+- [x] Implement `TelegramNotifier` as an optional push fallback if `ALERT_PROVIDER=telegram` (simple HTTP POST via `httpx`, PDF section 6).
+- [x] Provider factory returning `MockNotifier` (default) or `TelegramNotifier`.
+- [x] Tests with `httpx` mocked for Telegram provider.
+- [x] **Done when:** manual `curl` to `POST /api/v1/alerts` returns 201 and immediately shows up in `GET /api/v1/alerts`.
 
 ### B4. Realtime session endpoint - H+3:30 -> H+5:00 (needs C1)
 - [ ] `POST /api/v1/realtime/session`: calls `POST https://api.openai.com/v1/realtime/client_secrets` with the server API key and a session config:
