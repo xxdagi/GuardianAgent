@@ -22,16 +22,15 @@ Prerequisites: Python 3.11+, Node.js 20+, make (Docker optional).
 
 ```bash
 make setup   # .env files + venv + npm install (first time only)
-
-# terminal 1
-cd backend && . .venv/bin/activate && uvicorn app.main:app --reload --port 8000
-# terminal 2
-cd bff && npm run dev
-# terminal 3
-cd frontend && npm run dev
+make dev     # starts backend, bff, and frontend concurrently in ONE terminal!
 ```
 
-Or: `make up` (Docker). Open http://localhost:5173.
+- Open app: **http://localhost:5173**
+- Open recipient SMS phone: **http://localhost:5173/sms** (or `make sms` on port 3001)
+
+*(Works 100% out of the box with zero external configuration using built-in speech synthesis and local mock SMS. To enable ElevenLabs conversational AI agent, provide your `ELEVENLABS_API_KEY` and `ELEVENLABS_AGENT_ID` in `bff/.env`).*
+
+Or: `make up` (Docker).
 
 ## Tests
 
