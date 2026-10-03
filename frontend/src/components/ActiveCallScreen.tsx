@@ -76,14 +76,18 @@ export const ActiveCallScreen: React.FC<ActiveCallScreenProps> = ({
 
         <div className="flex items-center space-x-1">
           {emergencyTriggered ? (
-            <span className="flex items-center text-rose-500 text-[11px] font-medium animate-pulse">
+            <span className="flex items-center text-rose-500 text-[11px] font-semibold animate-pulse">
               <ShieldAlert className="w-3.5 h-3.5 mr-1" /> {getTranslation(language, "statusSos")}
             </span>
           ) : (
-            <span className="flex items-center text-neutral-500 text-[11px]">
+            <button
+              onClick={() => onSimulateKeyword(keywords?.[0] || "Przycisk SOS")}
+              className="flex items-center text-neutral-400 hover:text-rose-400 text-[11px] transition-colors"
+              title="Kliknij, aby wysłać cichy SOS"
+            >
               <ShieldCheck className="w-3.5 h-3.5 mr-1 text-emerald-500/70" />{" "}
               {getTranslation(language, "statusSafe")}
-            </span>
+            </button>
           )}
         </div>
       </div>
@@ -117,6 +121,28 @@ export const ActiveCallScreen: React.FC<ActiveCallScreenProps> = ({
           {formatDuration(seconds)}
         </p>
 
+        {/* Quick Keyword chip helper: user can either SPEAK it or TAP it */}
+        {!emergencyTriggered && (
+          <div className="mt-3 flex items-center justify-center flex-wrap gap-2">
+            {(keywords && keywords.length > 0 ? keywords.slice(0, 2) : ["czerwony"]).map((kw) => (
+              <button
+                key={kw}
+                onClick={() => onSimulateKeyword(kw)}
+                className="px-3 py-1 rounded-full bg-neutral-900/90 border border-neutral-700 hover:border-rose-500/60 text-xs text-neutral-300 hover:text-rose-300 flex items-center space-x-1.5 transition-all shadow-sm active:scale-95"
+                title="Kliknij lub powiedz to hasło, aby cicho wysłać SMS"
+              >
+                <span className="w-2 h-2 rounded-full bg-rose-500 animate-pulse" />
+                <span className="text-[11px]">
+                  {language === "pl" ? "Hasło:" : "Keyword:"}{" "}
+                  <span className="font-bold text-white underline decoration-rose-500/60">
+                    "{kw}"
+                  </span>
+                </span>
+              </button>
+            ))}
+          </div>
+        )}
+
         {/* Emergency Alert Confirmation & Live Transcript */}
         <EmergencyAlertBanner
           language={language}
@@ -138,16 +164,41 @@ export const ActiveCallScreen: React.FC<ActiveCallScreenProps> = ({
         onToggleSpeaker={() => setIsSpeaker((prev) => !prev)}
       />
 
-      {/* 4. Red Circular End Call Button */}
-      <div className="flex justify-center pb-4">
-        <motion.button
-          whileTap={{ scale: 0.92 }}
-          onClick={onEndCall}
-          className="w-18 h-18 p-5 rounded-full bg-red-600 active:bg-red-700 text-white flex items-center justify-center shadow-lg shadow-red-950/50 transition-colors"
-          aria-label="Zakończ połączenie"
-        >
-          <PhoneOff className="w-8 h-8 fill-current" />
-        </motion.button>
+      {/* 4. Action Buttons: Red End Call & Red SOS Trigger */}
+      <div className="flex items-center justify-center space-x-10 pb-4">
+        {/* Red End Call Button */}
+        <div className="flex flex-col items-center">
+          <motion.button
+            whileTap={{ scale: 0.92 }}
+            onClick={onEndCall}
+            className="w-16 h-16 rounded-full bg-red-600 active:bg-red-700 text-white flex items-center justify-center shadow-lg shadow-red-950/50 transition-colors"
+            aria-label="Zakończ połączenie"
+          >
+            <PhoneOff className="w-7 h-7 fill-current" />
+          </motion.button>
+          <span className="text-[11px] text-neutral-400 mt-1.5 font-medium">
+            {language === "pl" ? "Rozłącz" : "End Call"}
+          </span>
+        </div>
+
+        {/* Dedicated Red SOS Button (Sends Silent SMS with GPS) */}
+        <div className="flex flex-col items-center">
+          <motion.button
+            whileTap={{ scale: 0.92 }}
+            onClick={() => onSimulateKeyword(keywords?.[0] || "Przycisk SOS")}
+            className={`w-16 h-16 rounded-full flex items-center justify-center shadow-lg transition-all ${
+              emergencyTriggered
+                ? "bg-rose-950/80 border-2 border-rose-500 text-rose-300 shadow-rose-950/80"
+                : "bg-red-600 active:bg-red-700 text-white shadow-red-950/60 ring-4 ring-red-500/30 animate-pulse"
+            }`}
+            aria-label="Wyślij natychmiast cichy SMS SOS"
+          >
+            <ShieldAlert className="w-8 h-8" />
+          </motion.button>
+          <span className="text-[11px] text-rose-400 font-bold mt-1.5">
+            {emergencyTriggered ? (language === "pl" ? "SMS WYSŁANY" : "SMS SENT") : (language === "pl" ? "SOS (SMS)" : "SOS (SMS)")}
+          </span>
+        </div>
       </div>
     </div>
   );

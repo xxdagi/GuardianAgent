@@ -35,6 +35,12 @@ def list_alerts():
     return list(reversed(_alerts))
 
 
+@router.delete("", status_code=204)
+def clear_alerts():
+    """Clears the in-memory alerts feed for clean demo presentation."""
+    _alerts.clear()
+
+
 @router.post("", response_model=Alert, status_code=201)
 async def create_alert(body: AlertCreate):
     """Triggers silent emergency alert and dispatches notification via configured notifier."""

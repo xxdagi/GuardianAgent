@@ -27,8 +27,7 @@ const isLocation = (value: unknown): value is Location =>
   typeof value === "object" &&
   value !== null &&
   typeof (value as { latitude?: unknown }).latitude === "number" &&
-  typeof (value as { longitude?: unknown }).longitude === "number" &&
-  typeof (value as { accuracy?: unknown }).accuracy === "number";
+  typeof (value as { longitude?: unknown }).longitude === "number";
 const isLocationOrNull = (value: unknown): value is Location | null => value === null || isLocation(value);
 
 function readRealtimeSessionRequest(body: unknown): RealtimeSessionCreateRequest | null {
@@ -71,6 +70,16 @@ function readAlertRequest(body: unknown): AlertCreateRequest | null {
   ) {
     return null;
   }
+  let location: Location | null = null;
+  if (candidate.location && typeof candidate.location === "object") {
+    const loc = candidate.location as unknown as Record<string, unknown>;
+    location = {
+      latitude: loc.latitude as number,
+      longitude: loc.longitude as number,
+      accuracy: typeof loc.accuracy === "number" ? loc.accuracy : 15,
+    };
+  }
+
   return {
     sessionId: candidate.sessionId,
     level: candidate.level,
@@ -79,7 +88,7 @@ function readAlertRequest(body: unknown): AlertCreateRequest | null {
     language: candidate.language,
     recipientName: candidate.recipientName,
     recipientPhone: candidate.recipientPhone,
-    location: candidate.location,
+    location,
     transcriptSnippet: candidate.transcriptSnippet,
   };
 }
@@ -171,6 +180,15 @@ export function createApp() {
   app.get("/api/alerts", async (_req, res, next) => {
     try {
       res.json(await backend.listAlerts());
+    } catch (err) {
+      next(err);
+    }
+  });
+
+  app.delete("/api/alerts", async (_req, res, next) => {
+    try {
+      await fetch(`${config.backendUrl}/api/v1/alerts`, { method: "DELETE" });
+      res.status(204).end();
     } catch (err) {
       next(err);
     }

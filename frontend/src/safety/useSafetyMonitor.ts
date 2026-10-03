@@ -63,7 +63,7 @@ export function useSafetyMonitor(
           ? {
               latitude: loc.latitude,
               longitude: loc.longitude,
-              accuracy: loc.accuracy,
+              accuracy: typeof loc.accuracy === "number" ? loc.accuracy : 15,
             }
           : null;
 

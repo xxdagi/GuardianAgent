@@ -16,7 +16,17 @@ function matchesWholeWords(normalizedText: string, normalizedPhrase: string): bo
   }
   const escaped = escapeRegex(normalizedPhrase);
   const regex = new RegExp(`(^|\\s)${escaped}(\\s|$)`);
-  return regex.test(normalizedText);
+  if (regex.test(normalizedText)) {
+    return true;
+  }
+  // Polish declensions of 'czerwony' (czerwona, czerwone, czerwoną, czerwonym, etc.)
+  if (normalizedPhrase.startsWith("czerwon")) {
+    const stemRegex = /(^|\s)czerwon[a-z0-9]*(\s|$)/;
+    if (stemRegex.test(normalizedText)) {
+      return true;
+    }
+  }
+  return false;
 }
 
 /**

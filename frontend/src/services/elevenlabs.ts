@@ -54,9 +54,8 @@ export class ElevenLabsService {
         },
         onMessage: (data: { message: string; source: "user" | "ai" }) => {
           if (data && data.message) {
-            if (data.source === "user") {
-              callbacks.onUserTranscript?.(data.message);
-            }
+            // Forward speech to safety monitor keyword detection regardless of whether speaker is user or persona
+            callbacks.onUserTranscript?.(data.message);
             const sender = data.source === "user" ? "Ty" : (callbacks.callerName || "Agent");
             callbacks.onTranscript?.(`${sender}: ${data.message}`, true);
           }

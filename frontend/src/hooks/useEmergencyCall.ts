@@ -57,12 +57,31 @@ export function useEmergencyCall({
   }
   const activeSessionId = sessionId ?? defaultSessionIdRef.current;
 
+  const resolvedAlertPhrases = Array.from(
+    new Set([
+      "czerwony",
+      "czerwona",
+      "czerwone",
+      ...(keywords.length > 0 ? keywords : []),
+    ]),
+  );
+
+  const resolvedEmergencyPhrases = Array.from(
+    new Set([
+      "czerwony",
+      "czerwona",
+      "czerwone",
+      "zadzwoń do dziadka",
+      "call grandpa",
+    ]),
+  );
+
   const activeSafetySettings: SafetySettings = safetySettings ?? {
     language,
     contactName: contact.name || "Zaufany kontakt",
     contactPhone: contact.phone || "+48000000000",
-    alertPhrases: keywords.length > 0 ? keywords : ["czy nakarmiłaś kota"],
-    emergencyPhrases: ["zadzwoń do dziadka", "call grandpa"],
+    alertPhrases: resolvedAlertPhrases,
+    emergencyPhrases: resolvedEmergencyPhrases,
     emergencyNumber: contact.phone || "",
   };
 
@@ -77,8 +96,8 @@ export function useEmergencyCall({
 
   // 1. Sync keywords with speech service
   useEffect(() => {
-    speechService.setKeywords(keywords);
-  }, [keywords]);
+    speechService.setKeywords(resolvedAlertPhrases);
+  }, [resolvedAlertPhrases]);
 
   // 2. Continuous GPS tracking for home screen preview coordinates
   useEffect(() => {

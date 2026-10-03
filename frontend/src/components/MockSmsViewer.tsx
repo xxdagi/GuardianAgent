@@ -71,8 +71,8 @@ export const MockSmsViewer: React.FC<MockSmsViewerProps> = ({
   const [newSmsNotification, setNewSmsNotification] = useState<string | null>(null);
   const [viewMode, setViewMode] = useState<"live" | "all">("live");
 
-  // Track session start window (allows alerts from the current server session to appear even if tab opened after trigger)
-  const sessionStartTimeRef = useRef<number>(Date.now() - 1000 * 60 * 60);
+  // Track session start so we do NOT display old static alerts on launch ("nie na sztywno")
+  const sessionStartTimeRef = useRef<number>(Date.now());
   const knownAlertIdsRef = useRef<Set<string>>(new Set());
   const messagesEndRef = useRef<HTMLDivElement | null>(null);
 
@@ -147,8 +147,15 @@ export const MockSmsViewer: React.FC<MockSmsViewerProps> = ({
   }, [displayedAlerts.length]);
 
   // 4. Reset live session (empty live inbox for fresh demo demonstration)
-  const handleResetSession = () => {
+  const handleResetSession = async () => {
+    try {
+      await fetch("/api/alerts", { method: "DELETE" });
+    } catch {
+      // ignore
+    }
     sessionStartTimeRef.current = Date.now();
+    setAlerts([]);
+    knownAlertIdsRef.current.clear();
     setViewMode("live");
     setNewSmsNotification(null);
   };
@@ -160,7 +167,7 @@ export const MockSmsViewer: React.FC<MockSmsViewerProps> = ({
         sessionId: `demo-${Date.now()}`,
         level: "alert",
         source: "keyword",
-        triggerPhrase: "czy nakarmiłaś kota",
+        triggerPhrase: "czerwony",
         language,
         recipientName: recipientLabel,
         recipientPhone: contact?.phone || "+48500600700",
@@ -318,8 +325,8 @@ export const MockSmsViewer: React.FC<MockSmsViewerProps> = ({
               </p>
               <p className="text-xs text-[#9cadc0] mt-1.5 max-w-xs leading-relaxed font-medium">
                 {language === "pl"
-                  ? "Rozpocznij połączenie na telefonie i wypowiedz hasło alarmowe (np. 'czy nakarmiłaś kota'). Gdy telefon usłyszy hasło, cichy SMS pojawi się tutaj natychmiast."
-                  : "Start a call and speak your secret phrase. A silent SMS with Google Maps route will appear here in real time."}
+                  ? "Rozpocznij połączenie na telefonie i wypowiedz hasło alarmowe (np. 'czerwony'). Gdy telefon usłyszy hasło, cichy SMS pojawi się tutaj natychmiast."
+                  : "Start a call and speak your secret phrase (e.g. 'czerwony'). A silent SMS with Google Maps route will appear here in real time."}
               </p>
             </div>
 
