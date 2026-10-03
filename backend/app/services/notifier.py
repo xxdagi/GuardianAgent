@@ -57,17 +57,20 @@ class MockNotifier:
 
         # Visual log to terminal for hackathon demo
         print("\n" + "=" * 65)
-        print("🚨 [MOCK SMS DISPATCHER] Silent Alert Triggered!")
+        print("[MOCK SMS DISPATCHER] Silent Alert Triggered!")
         print(f"   Recipient: {alert_data.recipient_name} ({masked_phone})")
         print(f"   Level:     {alert_data.level.upper()} | Source: {alert_data.source.upper()}")
         print(f"   GPS:       {location_str}")
         if alert_data.trigger_phrase:
             print(f"   Trigger:   \"{alert_data.trigger_phrase}\"")
-        print(f"   SMS Body:  \"{simulated_message}\"")
+        try:
+            print(f"   SMS Body:  \"{simulated_message}\"")
+        except UnicodeEncodeError:
+            print(f"   SMS Body:  \"{simulated_message.encode('ascii', 'replace').decode('ascii')}\"")
         if maps_url:
             print(f"   Maps Link: {maps_url}")
-        print("   ✅ Status:   SMS DISPATCHED (Mock Delivery Successful)")
-        print("   ℹ️  Note:     Silent SMS only — NO emergency services (112) or voice calls are triggered.")
+        print("   [OK] Status: SMS DISPATCHED (Mock Delivery Successful)")
+        print("   [INFO] Note: Silent SMS only -- NO emergency services (112) or voice calls are triggered.")
         print("=" * 65 + "\n", flush=True)
 
         return [Delivery(channel="mock", status="sent")]
