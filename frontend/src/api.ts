@@ -1,0 +1,30 @@
+// Types mirror contracts/bff.openapi.yaml. The frontend talks ONLY to the BFF.
+export interface Item {
+  id: string;
+  name: string;
+  createdAt: string;
+}
+
+export interface ApiError {
+  error: { code: string; message: string; details?: unknown };
+}
+
+const BASE = import.meta.env.VITE_API_BASE_URL ?? "/api";
+
+async function request<T>(path: string, init?: RequestInit): Promise<T> {
+  const res = await fetch(`${BASE}${path}`, {
+    ...init,
+    headers: { "Content-Type": "application/json", ...init?.headers },
+  });
+  if (!res.ok) {
+    const body = (await res.json().catch(() => null)) as ApiError | null;
+    throw new Error(body?.error.message ?? `Request failed (${res.status})`);
+  }
+  return (await res.json()) as T;
+}
+
+export const api = {
+  listItems: () => request<Item[]>("/items"),
+  createItem: (name: string) =>
+    request<Item>("/items", { method: "POST", body: JSON.stringify({ name }) }),
+};

@@ -1,0 +1,27 @@
+# secrets
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+secrets/
+
+# python
+__pycache__/
+*.pyc
+.venv/
+.pytest_cache/
+.ruff_cache/
+
+# node
+node_modules/
+dist/
+build/
+*.tsbuildinfo
+coverage/
+
+# misc
+.DS_Store
+.idea/
+.vscode/
+*.log
