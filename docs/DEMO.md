@@ -27,7 +27,7 @@ HackYeah 2026 | Live Presentation & Demo Playbook
 1. **Presenter:** "Imagine walking home alone late at night. You notice someone following you. Taking out your phone and desperately dialing emergency numbers or tapping panic buttons can escalate danger instantly if noticed. What do we naturally do? We fake a phone call."
 2. **Action:** Presenter taps "Start Call" on the phone. The phone rings with "Mom" calling. Presenter answers.
 3. **Presenter:** "Halo mamo, cześć! Wracam właśnie do domu."
-4. **Mom (AI Agent via OpenAI Realtime):** "Cześć kochanie! Super, a którędy idziesz? Ciemno już na dworze."
+4. **Mom (AI Agent via Google Gemini Flash + ElevenLabs voice):** "Cześć kochanie! Super, a którędy idziesz? Ciemno już na dworze."
 5. **Presenter:** "Idę przez park, zaraz będę przy głównej ulicy."
 
 ### Act 2: Silent Alarm Trigger (1:00 - 1:45)

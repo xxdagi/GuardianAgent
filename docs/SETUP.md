@@ -46,6 +46,12 @@ Create the venv only once. Afterwards just activate it: `. backend/.venv/bin/act
 |----------|----------|---------|---------|
 | backend  | `APP_ENV` | `development` | environment name |
 | backend  | `CORS_ORIGINS` | `http://localhost:4000` | comma-separated allowed origins |
+| backend  | `GEMINI_API_KEY` | `""` | Google AI Studio API key (**free, no credit card**: https://aistudio.google.com) |
+| backend  | `GEMINI_MODEL` | `gemini-2.0-flash` | reasoning model for Mom conversation |
+| backend  | `ELEVENLABS_API_KEY` | `""` | ElevenLabs API key (**free tier, no credit card**: https://elevenlabs.io) |
+| backend  | `ELEVENLABS_VOICE_ID` | `21m00Tcm4TlvDq8ikWAM` | voice ID for warm Mom persona (multilingual v2) |
+| backend  | `ALERT_PROVIDER` | `mock` | alert dispatch provider (`mock` feeds live dispatcher dashboard) |
+| backend  | `OPENAI_API_KEY` | `""` | (optional fallback) OpenAI API key for Realtime WebRTC |
 | bff      | `PORT` | `4000` | listen port |
 | bff      | `BACKEND_URL` | `http://localhost:8000` | where the backend lives |
 | bff      | `CORS_ORIGIN` | `http://localhost:5173` | allowed frontend origin |
