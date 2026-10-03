@@ -126,13 +126,13 @@ Owns: `backend/`. Branches: `feat/backend-realtime`, `feat/backend-alerts`.
 - [x] **Done when:** A can open a WebRTC call using the secret from this endpoint (through the BFF).
 
 ### B5. Mom prompt (PL + EN) - H+5:00 -> H+6:30
-- [ ] `app/services/prompts.py`: templates per language. Content:
+- [x] `app/services/prompts.py`: templates per language. Content:
   - you are the user's mom on a phone call; warm, casual, **1-2 short spoken sentences**, no lists/emojis; ask simple questions to keep them talking (where are you, how far from home, what did you eat today);
   - never say you are an AI, never mention safety, alerts or tools;
   - if the user says any of the code phrases `{phrases}` (or clearly says they are in danger), call `trigger_alert` with the right level, then **continue the normal conversation as if nothing happened**;
   - always answer in `{language}`.
-- [ ] Test by talking (with A): natural tone, no false tool calls in normal chat, the tool fires on the code phrases in both languages.
-- **Done when:** 5 test conversations per language feel natural and the code phrases trigger reliably.
+- [x] Test by talking (with A): natural tone, no false tool calls in normal chat, the tool fires on the code phrases in both languages.
+- [x] **Done when:** 5 test conversations per language feel natural and the code phrases trigger reliably.
 
 ### B6. Hardening - H+6:30 -> end of day
 - [ ] Pair with C on M2 integration (the contract wins in any mismatch).
