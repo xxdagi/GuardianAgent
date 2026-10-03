@@ -76,6 +76,7 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({
       />
 
       <DemoSosSection
+        language={language}
         theme={theme}
         onTestEmergencyTrigger={onTestEmergencyTrigger}
       />

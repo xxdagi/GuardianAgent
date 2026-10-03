@@ -34,7 +34,7 @@ export const CustomConversationSection: React.FC<CustomConversationSectionProps>
       {/* Action Button: Navigate to Dedicated Add Conversation Page */}
       <button
         onClick={onNavigateToAddConversation}
-        className="w-full py-3.5 px-4 bg-[#9cadc0] hover:bg-[#788a9e] active:translate-y-0.5 text-white font-black text-xs rounded-2xl shadow-[0_3px_0_0_#788a9e] flex items-center justify-center space-x-2 transition-all uppercase tracking-wider"
+        className="btn-tactile-primary"
       >
         <PlusCircle className="w-4 h-4" />
         <span>{getTranslation(language, "addNewScenarioBtn")}</span>

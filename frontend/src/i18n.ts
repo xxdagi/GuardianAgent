@@ -28,67 +28,66 @@ export function getTranslation(
   return text;
 }
 
-export const DEFAULT_CALLERS_PL: DefaultCallerOption[] = [
-  { id: "mama", role: "Mama", callerName: "Mama", avatarText: "M" },
-  { id: "chlopak", role: "Chłopak", callerName: "Piotrek ❤️", avatarText: "P" },
-  { id: "brat", role: "Brat", callerName: "Kamil", avatarText: "K" },
-  { id: "przyjaciolka", role: "Przyjaciółka", callerName: "Ania", avatarText: "A" },
-];
+export function getDefaultCallers(lang: Language): DefaultCallerOption[] {
+  return [
+    {
+      id: "mama",
+      role: getTranslation(lang, "callerMamaRole"),
+      callerName: getTranslation(lang, "callerMamaName"),
+      avatarText: "M",
+    },
+    {
+      id: "chlopak",
+      role: getTranslation(lang, "callerBoyfriendRole"),
+      callerName: getTranslation(lang, "callerBoyfriendName"),
+      avatarText: "P",
+    },
+    {
+      id: "brat",
+      role: getTranslation(lang, "callerBrotherRole"),
+      callerName: getTranslation(lang, "callerBrotherName"),
+      avatarText: lang === "pl" ? "K" : "B",
+    },
+    {
+      id: "przyjaciolka",
+      role: getTranslation(lang, "callerFriendRole"),
+      callerName: getTranslation(lang, "callerFriendName"),
+      avatarText: "A",
+    },
+  ];
+}
 
-export const DEFAULT_CALLERS_EN: DefaultCallerOption[] = [
-  { id: "mama", role: "Mom", callerName: "Mom", avatarText: "M" },
-  { id: "chlopak", role: "Boyfriend", callerName: "Piotrek ❤️", avatarText: "P" },
-  { id: "brat", role: "Brother", callerName: "Brother", avatarText: "B" },
-  { id: "przyjaciolka", role: "Best friend", callerName: "Ania", avatarText: "A" },
-];
+export function getDefaultTopics(lang: Language): DefaultTopicOption[] {
+  return [
+    {
+      id: "day",
+      title: getTranslation(lang, "topicDayTitle"),
+      topics: getTranslation(lang, "topicDayDesc"),
+      greetingPl: getTranslation("pl", "topicDayGreeting"),
+      greetingEn: getTranslation("en", "topicDayGreeting"),
+    },
+    {
+      id: "work",
+      title: getTranslation(lang, "topicWorkTitle"),
+      topics: getTranslation(lang, "topicWorkDesc"),
+      greetingPl: getTranslation("pl", "topicWorkGreeting"),
+      greetingEn: getTranslation("en", "topicWorkGreeting"),
+    },
+    {
+      id: "school",
+      title: getTranslation(lang, "topicSchoolTitle"),
+      topics: getTranslation(lang, "topicSchoolDesc"),
+      greetingPl: getTranslation("pl", "topicSchoolGreeting"),
+      greetingEn: getTranslation("en", "topicSchoolGreeting"),
+    },
+  ];
+}
 
-export const DEFAULT_TOPICS_PL: DefaultTopicOption[] = [
-  {
-    id: "day",
-    title: "Jak minął ci dzień?",
-    topics: "o samopoczucie, obiad, powrót do domu, czy nie jest zimno",
-    greetingPl: "Cześć! Jak minął Ci dzisiejszy dzień? Gdzie teraz jesteś? Podgrzewam już obiad.",
-    greetingEn: "Hi! How was your day? Where are you now? I'm already warming up dinner for you.",
-  },
-  {
-    id: "work",
-    title: "Jak w pracy?",
-    topics: "o projekt w pracy, zmęczenie, plany na wieczór, wspólne gotowanie",
-    greetingPl: "Hejka! Jak tam minął dzień w pracy? Skończyłeś już wszystko? Czekam na Ciebie z herbatą.",
-    greetingEn: "Hey! How was work today? Are you on your way back? I just put the kettle on.",
-  },
-  {
-    id: "school",
-    title: "Jak w szkole / na uczelni?",
-    topics: "o zajęcia, kolokwium, czy wracasz autobusem, klucze do mieszkania",
-    greetingPl: "Siema! Jak poszło dzisiaj na zajęciach? Daleko masz jeszcze do domu? Czekam przy drzwiach.",
-    greetingEn: "Hey! How did your classes go? Where are you right now? Let me know when you're outside.",
-  },
-];
+export const DEFAULT_CALLERS_PL: DefaultCallerOption[] = getDefaultCallers("pl");
+export const DEFAULT_CALLERS_EN: DefaultCallerOption[] = getDefaultCallers("en");
 
-export const DEFAULT_TOPICS_EN: DefaultTopicOption[] = [
-  {
-    id: "day",
-    title: "How was your day?",
-    topics: "well-being, dinner, coming home, weather",
-    greetingPl: "Cześć! Jak minął Ci dzisiejszy dzień? Gdzie teraz jesteś? Podgrzewam już obiad.",
-    greetingEn: "Hi! How was your day? Where are you now? I'm already warming up dinner for you.",
-  },
-  {
-    id: "work",
-    title: "How was work?",
-    topics: "work project, commute, evening plans, dinner together",
-    greetingPl: "Hejka! Jak tam minął dzień w pracy? Skończyłeś już wszystko? Czekam na Ciebie z herbatą.",
-    greetingEn: "Hey! How was work today? Are you on your way back? I just put the kettle on.",
-  },
-  {
-    id: "school",
-    title: "How was school / university?",
-    topics: "classes, exam results, bus ride, apartment keys",
-    greetingPl: "Siema! Jak poszło dzisiaj na zajęciach? Daleko masz jeszcze do domu? Czekam przy drzwiach.",
-    greetingEn: "Hey! How did your classes go? Where are you right now? Let me know when you're outside.",
-  },
-];
+export const DEFAULT_TOPICS_PL: DefaultTopicOption[] = getDefaultTopics("pl");
+export const DEFAULT_TOPICS_EN: DefaultTopicOption[] = getDefaultTopics("en");
 
 export function buildDefaultScenario(
   caller: DefaultCallerOption,
@@ -104,10 +103,7 @@ export function buildDefaultScenario(
     isCustom: false,
     avatarText: caller.avatarText,
     initialGreeting: lang === "pl" ? topic.greetingPl : topic.greetingEn,
-    deterrentResponse:
-      lang === "pl"
-        ? "Dobrze, to ja już zakładam buty i wychodzę przed klatkę, będę na dole za minutę!"
-        : "Alright, I'm putting on my shoes and coming down to meet you outside right now!",
+    deterrentResponse: getTranslation(lang, "defaultDeterrentResponse"),
   };
 }
 
