@@ -1,8 +1,13 @@
-# HackYeah 2026
+# HackYeah 2026: Guardian Agent
 
-Hackathon starter with three independent services.
+A personal safety system created for the HackYeah 2026 hackathon, featuring a fully functional Agentic AI voice assistant. It actively monitors real-time conversations for specific code phrases or emergency context. When a threat is detected, the AI autonomously triggers an alert, sending an SMS with the user's GPS location to their trusted contacts. The project is built on a scalable, three-tier microservice architecture using contract-first OpenAPI design.
 
-```
+### Demo
+<video src="docs/GuardianAgentDemo.mp4" controls="controls" width="100%"></video>
+
+## Architecture
+
+```text
 frontend (React, :5173)  -->  bff (Node/TS, :4000)  -->  backend (Python/FastAPI, :8000)
 ```
 
@@ -16,7 +21,7 @@ frontend (React, :5173)  -->  bff (Node/TS, :4000)  -->  backend (Python/FastAPI
 
 Each service has its own dependencies, `.env`, Dockerfile and tests. They talk **only** over HTTP, according to `contracts/`.
 
-## Quick start
+## Quick start (Setup)
 
 Prerequisites: Python 3.11+, Node.js 20+, make (Docker optional).
 
@@ -29,7 +34,8 @@ make dev     # starts backend, bff, and frontend concurrently in ONE terminal!
 - Open recipient SMS phone: **http://localhost:5173/sms** (or `make sms` on port 3001)
 
 > **⚠️ IMPORTANT:** To experience the real, fully working AI voice agent, you must obtain the API keys from the repository author (or create your own) and paste them into your `.env` file. Without them, the app works but falls back to a robotic, offline browser speech synthesizer.
-Or: `make up` (Docker).
+
+Or using Docker: `make up`.
 
 ## Tests
 
