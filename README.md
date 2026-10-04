@@ -85,6 +85,22 @@ Required variables:
 
 *Note: The `.env` file is local and must never be committed to the repository. ElevenLabs credentials must be configured locally for the voice features to function properly.*
 
+## Quick start (Mac / Linux)
+
+Prerequisites: Python 3.11+, Node.js 20+, make (Docker optional).
+
+```bash
+make setup   # .env files + venv + npm install (first time only)
+make dev     # starts backend, bff, and frontend concurrently in ONE terminal!
+```
+
+- Open app: **http://localhost:5173**
+- Open recipient SMS phone: **http://localhost:5173/sms** (or `make sms` on port 3001)
+
+> **⚠️ IMPORTANT:** To experience the real, fully working AI voice agent, you must obtain the API keys from the repository author (or create your own) and paste them into your `.env` file. Without them, the app works but falls back to a robotic, offline browser speech synthesizer.
+
+Or using Docker: `make up`.
+
 ## Demo / Pitch (Windows)
 
 To run the full pitch environment on Windows, use the following command:
@@ -113,7 +129,7 @@ To stop all pitch processes (including servers and the tunnel), run:
 
 1. Clone the repository.
 2. Configure the local `.env` file using `.env.example`.
-3. Run `.\start-pitch.ps1`.
+3. Run `.\start-pitch.ps1` (Windows) or `make dev` (Mac/Linux).
 4. Scan the generated QR code with a mobile phone.
 5. Open the dispatcher URL on your laptop.
 6. Test the emergency voice flow (e.g., by saying the distress phrase into the phone).
