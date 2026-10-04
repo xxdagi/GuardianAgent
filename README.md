@@ -7,11 +7,10 @@ Voice-first personal safety companion disguised as a normal phone call.
 </p>
 
 <p align="center">
-	<video src=https://github.com/user-attachments/assets/ebbd6685-bf3e-4bb5-9ab3-7eccd8585c11 width="800" controls autoplay loop></video>
-	<br>
-	<em>A full demo walkthrough showing the main app.</em>
+    <video src="./HackYeah%202026%20Guardian%20Agent.mp4" width="800" controls autoplay loop></video>
+    <br>
+    <em>A full demo walkthrough showing the main app.</em>
 </p>
-
 
 
 ## What is Guardian Agent?
