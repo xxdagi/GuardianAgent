@@ -33,6 +33,14 @@ In a genuine emergency or threatening situation:
 7. **Dispatcher dashboard**: The incident appears in real-time on a web-based command center.
 8. **Voice feedback**: The AI naturally acknowledges the situation without breaking character.
 
+## Key Features
+
+- Fake phone call interface with real-time AI voice conversation (ElevenLabs + Gemini).
+- Silent distress phrase detection running in the background.
+- Live GPS tracking attached to alerts.
+- Real-time Dispatcher Dashboard (`/dispatcher`) showing incidents on a map.
+- Mock SMS notifier for demo purposes.
+
 ## Why it is different
 
 - **Voice-first safety interaction**: No fumbling with buttons; your voice is the trigger.
@@ -44,33 +52,19 @@ In a genuine emergency or threatening situation:
 - **Immediate voice feedback**: The AI keeps you calm and confirms help is on the way (discreetly).
 - **Cooldown**: Protection against repeated accidental triggers.
 
-## Key Features
+## Instructions for the Jury
 
-- Fake phone call interface with real-time AI voice conversation (ElevenLabs + Gemini).
-- Silent distress phrase detection running in the background.
-- Live GPS tracking attached to alerts.
-- Real-time Dispatcher Dashboard (`/dispatcher`) showing incidents on a map.
-- Mock SMS notifier for demo purposes.
+1. Clone the repository.
+2. Configure the local `.env` file using `.env.example`.
+3. Run `.\start-pitch.ps1` (Windows) or `make dev` (Mac/Linux).
+4. Scan the generated QR code with a mobile phone (or open `http://localhost:5173`).
+5. Open the dispatcher URL on your laptop (`/dispatcher`).
+6. Test the emergency voice flow (e.g., by saying the distress phrase into the phone).
+7. Observe the incident appearing on the dispatcher dashboard.
 
-## Architecture
+## Getting Started
 
-```text
-User
- ↓
-Frontend / Voice Assistant
- ↓
-Safety Pipeline
- ↓
-BFF API
- ↓
-Backend
- ↓
-Dispatcher Dashboard
-```
-
-*Note: ElevenLabs is utilized in the Frontend/BFF layer for the Conversational AI.*
-
-## Environment Configuration
+### Environment Configuration
 
 Guardian Agent requires a single `.env` file located in the root directory. You can use the provided `.env.example` as a template.
 
@@ -83,25 +77,9 @@ Required variables:
 - `CORS_ORIGINS`
 - `APP_ENV`
 
-*Note: The `.env` file is local and must never be committed to the repository. ElevenLabs credentials must be configured locally for the voice features to function properly.*
+*Note: The `.env` file is local and must never be committed to the repository. ElevenLabs credentials must be configured locally for the voice features to function properly. Without them, the app works but falls back to a robotic, offline browser speech synthesizer.*
 
-## Quick start (Mac / Linux)
-
-Prerequisites: Python 3.11+, Node.js 20+, make (Docker optional).
-
-```bash
-make setup   # .env files + venv + npm install (first time only)
-make dev     # starts backend, bff, and frontend concurrently in ONE terminal!
-```
-
-- Open app: **http://localhost:5173**
-- Open recipient SMS phone: **http://localhost:5173/sms** (or `make sms` on port 3001)
-
-> **⚠️ IMPORTANT:** To experience the real, fully working AI voice agent, you must obtain the API keys from the repository author (or create your own) and paste them into your `.env` file. Without them, the app works but falls back to a robotic, offline browser speech synthesizer.
-
-Or using Docker: `make up`.
-
-## Demo / Pitch (Windows)
+### Option 1: Demo / Pitch on Windows
 
 To run the full pitch environment on Windows, use the following command:
 
@@ -123,31 +101,59 @@ To stop all pitch processes (including servers and the tunnel), run:
 .\stop-pitch.ps1
 ```
 
-**Note:** The Cloudflare URL is ephemeral and will change every time the pitch environment is restarted.
+*Note: The Cloudflare URL is ephemeral and will change every time the pitch environment is restarted.*
 
-### Instructions for the Jury
+### Option 2: Quick Start on Mac / Linux
 
-1. Clone the repository.
-2. Configure the local `.env` file using `.env.example`.
-3. Run `.\start-pitch.ps1` (Windows) or `make dev` (Mac/Linux).
-4. Scan the generated QR code with a mobile phone.
-5. Open the dispatcher URL on your laptop.
-6. Test the emergency voice flow (e.g., by saying the distress phrase into the phone).
-7. Observe the incident appearing on the dispatcher dashboard.
+Prerequisites: Python 3.11+, Node.js 20+, make.
 
-## Development
+```bash
+make setup   # .env files + venv + npm install (first time only)
+make dev     # starts backend, bff, and frontend concurrently in ONE terminal!
+```
 
-- **backend**: Python (FastAPI)
-- **BFF**: Node.js (Express, TypeScript)
-- **frontend**: React (Vite, TypeScript)
-- **Docker**: Supported via `docker-compose.yml` (`make up`).
+- Open app: **http://localhost:5173**
+- Open recipient SMS phone: **http://localhost:5173/sms** (or `make sms` on port 3001)
+
+### Option 3: Docker
+
+Run the entire stack in containers using `docker-compose.yml`:
+
+```bash
+make up
+```
+
+## Architecture
+
+```text
+User
+ ↓
+Frontend / Voice Assistant
+ ↓
+Safety Pipeline
+ ↓
+BFF API
+ ↓
+Backend
+ ↓
+Dispatcher Dashboard
+```
+
+*Note: ElevenLabs is utilized in the Frontend/BFF layer for the Conversational AI.*
 
 ## Project Structure
 
-- `backend/` - Python API
-- `bff/` - Backend-for-Frontend (Node.js)
-- `frontend/` - React application
+- `backend/` - Python API (FastAPI)
+- `bff/` - Backend-for-Frontend (Node.js, Express, TypeScript)
+- `frontend/` - React application (Vite, TypeScript)
 - `docs/` - Documentation & architecture
+
+## Development Stack
+
+- **Backend**: Python 3.11+ (FastAPI)
+- **BFF**: Node.js (Express, TypeScript)
+- **Frontend**: React (Vite, TypeScript)
+- **Containerization**: Docker & Docker Compose
 
 ## Current Implementation Status
 
