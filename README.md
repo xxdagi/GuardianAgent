@@ -2,6 +2,18 @@
 
 Voice-first personal safety companion disguised as a normal phone call.
 
+<p align="center">
+	<img width="1920" height="1080" alt="Prezentacja aplikacji" src="https://github.com/user-attachments/assets/0d053c5b-e4b5-4f44-aeb6-b699cae0a5fe" />
+</p>
+
+<p align="center">
+	<video src=https://github.com/user-attachments/assets/496049a2-812d-457b-b504-79d43084dda0 width="800" controls autoplay loop></video>
+	<br>
+	<em>A full demo walkthrough showing the main app.</em>
+</p>
+
+
+
 ## What is Guardian Agent?
 
 Guardian Agent is a voice-first personal safety application. To an outside observer, it looks and sounds like you are having a normal phone conversation. In reality, the AI agent is actively monitoring your speech for specific distress phrases. When triggered, it initiates a silent, hands-free emergency activation, capturing your GPS location and sending an immediate emergency alert to a live dispatcher dashboard.
