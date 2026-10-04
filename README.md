@@ -70,48 +70,11 @@ Dispatcher Dashboard
 
 *Note: ElevenLabs is utilized in the Frontend/BFF layer for the Conversational AI.*
 
-## Demo / Pitch
-
-### Windows
-
-To run the full pitch environment on Windows, use:
-
-```powershell
-.\start-pitch.ps1
-```
-
-Skrypt wykonuje następujące kroki:
-- Uruchamia wymagane serwisy (Backend, BFF, Frontend).
-- Uruchamia ephemeral Cloudflare tunnel.
-- Generuje tymczasowy publiczny HTTPS URL (wymagany dla mikrofonu na telefonie).
-- Generuje kod QR dla telefonu.
-- Pokazuje URL aplikacji mobilnej (PHONE URL).
-- Pokazuje URL panelu dyspozytora (DISPATCHER URL).
-
-### Stop
-
-```powershell
-.\stop-pitch.ps1
-```
-
-Zatrzymuje wszystkie procesy pitchowe (w tym serwery i tunel).
-
-**Uwaga:** The Cloudflare URL is ephemeral and changes when the pitch environment is restarted.
-
-### For the Jury
-
-1. Clone repository.
-2. Configure local `.env` using `.env.example`.
-3. Run `.\start-pitch.ps1`.
-4. Scan the generated QR code with a phone.
-5. Open the dispatcher URL on the laptop.
-6. Test the emergency voice flow (e.g. by saying the distress phrase).
-7. Observe the incident appearing in the dispatcher dashboard.
-
 ## Environment Configuration
 
-Guardian Agent requires a single `.env` file in the root directory.
+Guardian Agent requires a single `.env` file located in the root directory. You can use the provided `.env.example` as a template.
 
+Required variables:
 - `ELEVENLABS_API_KEY`
 - `ELEVENLABS_AGENT_ID`
 - `PORT`
@@ -120,7 +83,41 @@ Guardian Agent requires a single `.env` file in the root directory.
 - `CORS_ORIGINS`
 - `APP_ENV`
 
-*Note: `.env` is local and never committed. `.env.example` contains placeholders. ElevenLabs credentials must be configured locally for the voice features to work.*
+*Note: The `.env` file is local and must never be committed to the repository. ElevenLabs credentials must be configured locally for the voice features to function properly.*
+
+## Demo / Pitch (Windows)
+
+To run the full pitch environment on Windows, use the following command:
+
+```powershell
+.\start-pitch.ps1
+```
+
+This script automatically performs the following steps:
+- Starts the required services (Backend, BFF, Frontend).
+- Launches an ephemeral Cloudflare tunnel.
+- Generates a temporary public HTTPS URL (which is required for microphone access on a mobile device).
+- Generates a QR code for the phone.
+- Displays the mobile app URL (PHONE URL).
+- Displays the dispatcher dashboard URL (DISPATCHER URL).
+
+To stop all pitch processes (including servers and the tunnel), run:
+
+```powershell
+.\stop-pitch.ps1
+```
+
+**Note:** The Cloudflare URL is ephemeral and will change every time the pitch environment is restarted.
+
+### Instructions for the Jury
+
+1. Clone the repository.
+2. Configure the local `.env` file using `.env.example`.
+3. Run `.\start-pitch.ps1`.
+4. Scan the generated QR code with a mobile phone.
+5. Open the dispatcher URL on your laptop.
+6. Test the emergency voice flow (e.g., by saying the distress phrase into the phone).
+7. Observe the incident appearing on the dispatcher dashboard.
 
 ## Development
 
