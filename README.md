@@ -62,66 +62,77 @@ In a genuine emergency or threatening situation:
 6. Test the emergency voice flow (e.g., by saying the distress phrase into the phone).
 7. Observe the incident appearing on the dispatcher dashboard.
 
-## Getting Started
+## How to Run the Application
 
-### Environment Configuration
+### 1. Prerequisites
+- Python 3.11+
+- Node.js 20+
+- `make` (optional, for convenience shortcuts)
+- Docker & Docker Compose (optional)
 
-Guardian Agent requires a single `.env` file located in the root directory. You can use the provided `.env.example` as a template.
+### 2. Environment Configuration
+Guardian Agent requires a single `.env` file located in the root directory. You can use the provided `.env.example` as a template:
+
+```bash
+cp .env.example .env
+```
 
 Required variables:
 - `ELEVENLABS_API_KEY`
 - `ELEVENLABS_AGENT_ID`
-- `PORT`
-- `BACKEND_URL`
-- `CORS_ORIGIN`
-- `CORS_ORIGINS`
-- `APP_ENV`
+- `PORT` (default: 4000)
+- `BACKEND_URL` (default: http://localhost:8000)
+- `CORS_ORIGIN` (default: http://localhost:5173)
+- `CORS_ORIGINS` (default: http://localhost:4000)
+- `APP_ENV` (default: development)
 
-*Note: The `.env` file is local and must never be committed to the repository. ElevenLabs credentials must be configured locally for the voice features to function properly. Without them, the app works but falls back to a robotic, offline browser speech synthesizer.*
+*Note: The `.env` file is local and must never be committed to the repository. ElevenLabs credentials must be configured locally for the voice features to function properly. Without them, the app works but falls back to an offline browser speech synthesizer.*
 
-### Option 1: Demo / Pitch on Windows
+### 3. Starting the Services
 
-To run the full pitch environment on Windows, use the following command:
+#### Option A: Quick Start (Mac / Linux with Make)
+```bash
+make setup   # Sets up .env, Python venv, and npm dependencies (first time only)
+make dev     # Starts backend, BFF, and frontend concurrently in one terminal
+```
 
+#### Option B: Windows Automated Pitch Environment
+Ideal for jury presentation and live mobile testing:
 ```powershell
 .\start-pitch.ps1
 ```
+This script starts all services, sets up an ephemeral Cloudflare tunnel for HTTPS mobile microphone access, and outputs a QR code to scan with a phone.
 
-This script automatically performs the following steps:
-- Starts the required services (Backend, BFF, Frontend).
-- Launches an ephemeral Cloudflare tunnel.
-- Generates a temporary public HTTPS URL (which is required for microphone access on a mobile device).
-- Generates a QR code for the phone.
-- Displays the mobile app URL (PHONE URL).
-- Displays the dispatcher dashboard URL (DISPATCHER URL).
-
-To stop all pitch processes (including servers and the tunnel), run:
-
+To stop all services:
 ```powershell
 .\stop-pitch.ps1
 ```
 
-*Note: The Cloudflare URL is ephemeral and will change every time the pitch environment is restarted.*
-
-### Option 2: Quick Start on Mac / Linux
-
-Prerequisites: Python 3.11+, Node.js 20+, make.
-
-```bash
-make setup   # .env files + venv + npm install (first time only)
-make dev     # starts backend, bff, and frontend concurrently in ONE terminal!
-```
-
-- Open app: **http://localhost:5173**
-- Open recipient SMS phone: **http://localhost:5173/sms** (or `make sms` on port 3001)
-
-### Option 3: Docker
-
-Run the entire stack in containers using `docker-compose.yml`:
-
+#### Option C: Docker Compose (Cross-Platform)
 ```bash
 make up
+# or: docker compose up --build
 ```
+
+#### Option D: Manual Startup (Separate Terminals)
+```bash
+# Terminal 1 - Backend (FastAPI)
+cd backend && source .venv/bin/activate && uvicorn app.main:app --reload --port 8000
+
+# Terminal 2 - BFF (Express / TypeScript)
+cd bff && npm run dev
+
+# Terminal 3 - Frontend (React / Vite)
+cd frontend && npm run dev
+```
+
+### 4. Application URLs
+Once running, you can access the components at:
+- **Phone UI (Caller interface)**: http://localhost:5173
+- **Dispatcher Dashboard**: http://localhost:5173/dispatcher
+- **Mock SMS Phone**: http://localhost:5173/sms (or port 3001 via `make sms`)
+- **Backend API Documentation**: http://localhost:8000/docs
+- **BFF Health Check**: http://localhost:4000/health
 
 ## Architecture
 
