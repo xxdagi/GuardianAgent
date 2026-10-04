@@ -1,15 +1,9 @@
 import React from "react";
 import {
-  AlertTriangle,
-  Flame,
-  Radio,
   Clock,
   MapPin,
-  Bot,
-  Keyboard,
   CheckCircle2,
   XCircle,
-  MessageSquareQuote,
 } from "lucide-react";
 import type { AlertListItem } from "../api";
 
@@ -17,12 +11,14 @@ interface IncidentCardProps {
   alert: AlertListItem;
   isSelected: boolean;
   onSelect: (alert: AlertListItem) => void;
+  isNew?: boolean;
 }
 
 export const IncidentCard: React.FC<IncidentCardProps> = ({
   alert,
   isSelected,
   onSelect,
+  isNew,
 }) => {
   const isEmergency = alert.level === "emergency";
   const formattedDate = new Date(alert.createdAt).toLocaleTimeString("pl-PL", {
@@ -31,99 +27,77 @@ export const IncidentCard: React.FC<IncidentCardProps> = ({
     second: "2-digit",
   });
 
-  const getSourceIcon = () => {
-    switch (alert.source) {
-      case "keyword":
-        return <Radio className="w-3.5 h-3.5 text-amber-400" />;
-      case "agent":
-        return <Bot className="w-3.5 h-3.5 text-indigo-400" />;
-      case "manual":
-        return <Keyboard className="w-3.5 h-3.5 text-rose-400" />;
-      default:
-        return null;
-    }
-  };
-
-  const getSourceLabel = () => {
-    switch (alert.source) {
-      case "keyword":
-        return "Słowo klucz";
-      case "agent":
-        return "Agent AI";
-      case "manual":
-        return "Manual SOS";
-      default:
-        return alert.source;
-    }
-  };
-
   return (
     <div
       onClick={() => onSelect(alert)}
-      className={`cursor-pointer rounded-xl p-4 transition-all border text-left flex flex-col gap-3 ${
+      className={`cursor-pointer rounded-2xl p-4 transition-all text-left flex flex-col gap-2.5 border-2 ${
         isSelected
-          ? "border-sky-500 bg-slate-800/90 shadow-lg shadow-sky-950/40 ring-1 ring-sky-500"
+          ? isEmergency
+            ? "bg-[#18222e] border-rose-500/80 shadow-[0_2px_0_0_#e11d48]"
+            : "bg-[#18222e] border-[#9cadc0] shadow-[0_2px_0_0_#c0d4ed]"
           : isEmergency
-          ? "border-rose-800/60 bg-rose-950/20 hover:bg-rose-950/40 hover:border-rose-700"
-          : "border-slate-800 bg-slate-900/60 hover:bg-slate-800/60 hover:border-slate-700"
+          ? "bg-[#141b24] border-rose-900/50 hover:border-rose-700/60"
+          : "bg-[#101720] border-[#9cadc0]/25 hover:border-[#9cadc0]/50"
       }`}
     >
       {/* Top Header Row */}
       <div className="flex items-center justify-between gap-2">
         <div className="flex items-center gap-2">
-          {isEmergency ? (
-            <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-bold uppercase tracking-wider bg-rose-600 text-white shadow-sm animate-pulse">
-              <Flame className="w-3.5 h-3.5 fill-current" />
-              EMERGENCY
-            </span>
-          ) : (
-            <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-semibold uppercase tracking-wider bg-amber-500/20 text-amber-300 border border-amber-500/30">
-              <AlertTriangle className="w-3.5 h-3.5" />
-              ALERT
+          {/* Subtle Level Badge matching mobile language */}
+          <span
+            className={`px-2.5 py-0.5 rounded-lg text-[11px] font-black tracking-wide uppercase border ${
+              isEmergency
+                ? "bg-rose-950/60 border-rose-700 text-rose-300"
+                : "bg-[#1c2b39] border-[#9cadc0]/40 text-[#c0d4ed]"
+            }`}
+          >
+            {isEmergency ? "Emergency" : "Alert"}
+          </span>
+
+          <span className="text-[11px] text-[#9cadc0] font-medium uppercase tracking-wider">
+            {alert.source}
+          </span>
+
+          {isNew && (
+            <span className="px-1.5 py-0.2 rounded text-[10px] font-black uppercase bg-emerald-500/20 text-emerald-400 border border-emerald-500/40">
+              New
             </span>
           )}
-
-          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-xs bg-slate-800 text-slate-300 border border-slate-700">
-            {getSourceIcon()}
-            <span>{getSourceLabel()}</span>
-          </span>
         </div>
 
-        <div className="flex items-center gap-1 text-xs text-slate-400">
+        <div className="flex items-center gap-1 text-[11px] font-medium text-[#9cadc0]">
           <Clock className="w-3.5 h-3.5" />
           <span>{formattedDate}</span>
         </div>
       </div>
 
-      {/* Trigger phrase */}
-      {alert.triggerPhrase && (
-        <div className="text-sm font-semibold text-slate-100 flex items-baseline gap-2">
-          <span className="text-slate-400 font-normal text-xs uppercase tracking-wide">Fraza:</span>
-          <span className="text-rose-300 bg-rose-950/40 px-2 py-0.5 rounded border border-rose-900/60 font-mono">
-            &ldquo;{alert.triggerPhrase}&rdquo;
-          </span>
-        </div>
-      )}
+      {/* Trigger Phrase or Title */}
+      <div className="text-sm font-bold text-[#c0d4ed] leading-snug">
+        {alert.triggerPhrase ? (
+          <span className="text-white">&ldquo;{alert.triggerPhrase}&rdquo;</span>
+        ) : (
+          <span className="text-[#9cadc0] italic font-normal">Sygnał bez frazy</span>
+        )}
+      </div>
 
-      {/* Transcript snippet */}
+      {/* Transcript snippet if available */}
       {alert.transcriptSnippet && (
-        <div className="bg-slate-950/70 rounded-lg p-2.5 border border-slate-800/80 text-xs text-slate-300 flex items-start gap-2">
-          <MessageSquareQuote className="w-4 h-4 text-slate-500 shrink-0 mt-0.5" />
-          <p className="italic line-clamp-2">&ldquo;{alert.transcriptSnippet}&rdquo;</p>
-        </div>
+        <p className="text-xs text-[#9cadc0] line-clamp-1 italic">
+          &ldquo;{alert.transcriptSnippet}&rdquo;
+        </p>
       )}
 
       {/* Footer info: Location & Deliveries */}
-      <div className="pt-2 border-t border-slate-800/60 flex items-center justify-between text-xs text-slate-400">
-        <div className="flex items-center gap-1.5">
-          <MapPin className="w-3.5 h-3.5 text-slate-400" />
+      <div className="pt-2 border-t border-[#9cadc0]/20 flex items-center justify-between text-[11px] text-[#9cadc0]">
+        <div className="flex items-center gap-1">
+          <MapPin className="w-3.5 h-3.5 text-rose-400" />
           {alert.location ? (
-            <span className="text-slate-300">
+            <span>
               {alert.location.latitude.toFixed(4)}, {alert.location.longitude.toFixed(4)}
-              <span className="text-slate-500 ml-1">(±{Math.round(alert.location.accuracy)}m)</span>
+              <span className="text-neutral-500 ml-1">(±{Math.round(alert.location.accuracy)}m)</span>
             </span>
           ) : (
-            <span className="text-slate-500 italic">Brak GPS</span>
+            <span className="text-neutral-500">Brak GPS</span>
           )}
         </div>
 
@@ -132,18 +106,14 @@ export const IncidentCard: React.FC<IncidentCardProps> = ({
             {alert.deliveries.map((del, idx) => (
               <span
                 key={idx}
-                className={`inline-flex items-center gap-1 text-[11px] px-1.5 py-0.5 rounded ${
-                  del.status === "sent"
-                    ? "text-emerald-400 bg-emerald-950/40 border border-emerald-800/50"
-                    : "text-rose-400 bg-rose-950/40 border border-rose-800/50"
-                }`}
+                className="inline-flex items-center gap-1 text-[10px] font-bold uppercase text-[#9cadc0]"
               >
                 {del.status === "sent" ? (
-                  <CheckCircle2 className="w-3 h-3" />
+                  <CheckCircle2 className="w-3 h-3 text-emerald-400" />
                 ) : (
-                  <XCircle className="w-3 h-3" />
+                  <XCircle className="w-3 h-3 text-rose-400" />
                 )}
-                <span className="uppercase">{del.channel}</span>
+                <span>{del.channel}</span>
               </span>
             ))}
           </div>
