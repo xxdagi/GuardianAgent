@@ -1,6 +1,20 @@
-# Demo Script & Pitch Guide - Guardian Agent
+# Demo Script & Pitch Guide — Guardian Agent
 
 HackYeah 2026 | Live Presentation & Demo Playbook
+
+## Quick Start for Pitch
+
+To start all services, ephemeral Cloudflare tunnel and generate the mobile QR code in a single command on Windows:
+
+```powershell
+.\start-pitch.ps1
+```
+
+To stop all services after the pitch:
+
+```powershell
+.\stop-pitch.ps1
+```
 
 ---
 

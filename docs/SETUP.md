@@ -24,7 +24,7 @@ make setup
 
 It copies `.env.example` to `.env` at root (if missing), creates `backend/.venv`, and installs Python and npm dependencies.
 
-SafeCall supports a **single root `.env` file** at the root of the project! You don't need to edit multiple files — just configure everything in `.env` at the project root.
+Guardian Agent supports a **single root `.env` file** at the root of the project! You don't need to edit multiple files — just configure everything in `.env` at the project root.
 
 Manual equivalent:
 
@@ -53,7 +53,7 @@ Create the venv only once. Afterwards just activate it: `. backend/.venv/bin/act
 | `APP_ENV` | `development` | Environment name |
 
 > **⚠️ Note for teammates & testers:** 
-> Without `ELEVENLABS_API_KEY` and `ELEVENLABS_AGENT_ID`, the app will still start and run locally, but the voice assistant will fall back to a robotic-sounding browser speech synthesizer. **For the full, realistic "SafeCall" experience, ask the project author for their API keys** (or provide your own) and paste them into your `.env` file!
+> Without `ELEVENLABS_API_KEY` and `ELEVENLABS_AGENT_ID`, the app will still start and run locally, but the voice assistant will fall back to a robotic-sounding browser speech synthesizer. **For the full, realistic Guardian Agent experience, ask the project author for their API keys** (or provide your own) and paste them into your `.env` file!
 
 ## 4. Run locally (3 terminals)
 
