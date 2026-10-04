@@ -31,6 +31,20 @@ make dev     # starts backend, bff, and frontend concurrently in ONE terminal!
 > **⚠️ IMPORTANT:** To experience the real, fully working AI voice agent, you must obtain the API keys from the repository author (or create your own) and paste them into your `.env` file. Without them, the app works but falls back to a robotic, offline browser speech synthesizer.
 Or: `make up` (Docker).
 
+## Pitch Demo
+
+### Uruchomienie dema
+
+Na Windows:
+```powershell
+.\start-pitch.ps1
+```
+
+Po zakończeniu:
+```powershell
+.\stop-pitch.ps1
+```
+
 ## Tests
 
 `make test` runs all tests, `make lint` runs all static checks.

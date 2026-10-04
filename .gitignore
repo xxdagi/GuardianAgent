@@ -27,3 +27,7 @@ coverage/
 *.log
 docs/*.html
 docs/*_files/
+
+# pitch demo runtime artefacts (generated locally, never commit)
+demo-qr.png
+.pitch-pids.json
