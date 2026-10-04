@@ -7,7 +7,7 @@ Voice-first personal safety companion disguised as a normal phone call.
 </p>
 
 <p align="center">
-	<video src=https://github.com/user-attachments/assets/496049a2-812d-457b-b504-79d43084dda0 width="800" controls autoplay loop></video>
+	<video src=https://github.com/user-attachments/assets/ebbd6685-bf3e-4bb5-9ab3-7eccd8585c11 width="800" controls autoplay loop></video>
 	<br>
 	<em>A full demo walkthrough showing the main app.</em>
 </p>
