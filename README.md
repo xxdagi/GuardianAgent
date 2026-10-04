@@ -1,61 +1,144 @@
-# HackYeah 2026
+# Guardian Agent
 
-Hackathon starter with three independent services.
+Voice-first personal safety companion disguised as a normal phone call.
 
+## What is Guardian Agent?
+
+Guardian Agent is a voice-first personal safety application. To an outside observer, it looks and sounds like you are having a normal phone conversation. In reality, the AI agent is actively monitoring your speech for specific distress phrases. When triggered, it initiates a silent, hands-free emergency activation, capturing your GPS location and sending an immediate emergency alert to a live dispatcher dashboard.
+
+## The Problem
+
+In a genuine emergency or threatening situation:
+- You may not be able to safely take out and unlock your phone.
+- Reaching for a panic button or dialing emergency services can escalate the danger if noticed by an attacker.
+- You need a discrete, passive way to call for help without breaking your cover.
+
+*Disguising your plea for help as a casual phone call is a natural human defense mechanism.*
+
+## Our Solution
+
+1. **Voice input**: You speak naturally to an AI voice assistant (disguised as a contact, e.g., "Mom").
+2. **Distress phrase detection**: The app continuously listens for pre-configured secret phrases (e.g., "Did you feed the cat?").
+3. **Speech normalization**: Polish speech is handled accurately.
+4. **Rolling transcript & Severity**: The conversation is transcribed and analyzed.
+5. **GPS**: High-accuracy location is captured.
+6. **Alert dispatch**: A silent HTTP POST is sent to the backend.
+7. **Dispatcher dashboard**: The incident appears in real-time on a web-based command center.
+8. **Voice feedback**: The AI naturally acknowledges the situation without breaking character.
+
+## Why it is different
+
+- **Voice-first safety interaction**: No fumbling with buttons; your voice is the trigger.
+- **Hands-free activation**: Works even if your phone is in your pocket (with a headset).
+- **Polish speech normalization**: Optimized for natural Polish emergency phrases.
+- **Configurable distress phrases**: Customize what triggers the alarm.
+- **Automatic location**: GPS coordinates are sent instantly.
+- **Dispatcher workflow**: Professional web interface for monitoring incidents.
+- **Immediate voice feedback**: The AI keeps you calm and confirms help is on the way (discreetly).
+- **Cooldown**: Protection against repeated accidental triggers.
+
+## Key Features
+
+- Fake phone call interface with real-time AI voice conversation (ElevenLabs + Gemini).
+- Silent distress phrase detection running in the background.
+- Live GPS tracking attached to alerts.
+- Real-time Dispatcher Dashboard (`/dispatcher`) showing incidents on a map.
+- Mock SMS notifier for demo purposes.
+
+## Architecture
+
+```text
+User
+ ↓
+Frontend / Voice Assistant
+ ↓
+Safety Pipeline
+ ↓
+BFF API
+ ↓
+Backend
+ ↓
+Dispatcher Dashboard
 ```
-frontend (React, :5173)  -->  bff (Node/TS, :4000)  -->  backend (Python/FastAPI, :8000)
-```
 
-| Folder      | Role                                   | Stack                    |
-|-------------|----------------------------------------|--------------------------|
-| `backend/`  | Domain logic, data, integrations       | Python 3.11+, FastAPI    |
-| `bff/`      | Backend-for-frontend: aggregation/auth | Node 20+, TypeScript, Express |
-| `frontend/` | UI                                     | React, TypeScript, Vite  |
-| `contracts/`| API contracts (OpenAPI) - source of truth | YAML                  |
-| `docs/`     | Architecture + rules for humans & AI agents | Markdown            |
+*Note: ElevenLabs is utilized in the Frontend/BFF layer for the Conversational AI.*
 
-Each service has its own dependencies, `.env`, Dockerfile and tests. They talk **only** over HTTP, according to `contracts/`.
+## Demo / Pitch
 
-## Quick start
+### Windows
 
-Prerequisites: Python 3.11+, Node.js 20+, make (Docker optional).
+To run the full pitch environment on Windows, use:
 
-```bash
-make setup   # .env files + venv + npm install (first time only)
-make dev     # starts backend, bff, and frontend concurrently in ONE terminal!
-```
-
-- Open app: **http://localhost:5173**
-- Open recipient SMS phone: **http://localhost:5173/sms** (or `make sms` on port 3001)
-
-> **⚠️ IMPORTANT:** To experience the real, fully working AI voice agent, you must obtain the API keys from the repository author (or create your own) and paste them into your `.env` file. Without them, the app works but falls back to a robotic, offline browser speech synthesizer.
-Or: `make up` (Docker).
-
-## Pitch Demo
-
-### Uruchomienie dema
-
-Na Windows:
 ```powershell
 .\start-pitch.ps1
 ```
 
-Po zakończeniu:
+Skrypt wykonuje następujące kroki:
+- Uruchamia wymagane serwisy (Backend, BFF, Frontend).
+- Uruchamia ephemeral Cloudflare tunnel.
+- Generuje tymczasowy publiczny HTTPS URL (wymagany dla mikrofonu na telefonie).
+- Generuje kod QR dla telefonu.
+- Pokazuje URL aplikacji mobilnej (PHONE URL).
+- Pokazuje URL panelu dyspozytora (DISPATCHER URL).
+
+### Stop
+
 ```powershell
 .\stop-pitch.ps1
 ```
 
-## Tests
+Zatrzymuje wszystkie procesy pitchowe (w tym serwery i tunel).
 
-`make test` runs all tests, `make lint` runs all static checks.
+**Uwaga:** The Cloudflare URL is ephemeral and changes when the pitch environment is restarted.
 
-Full guide (prerequisites, env variables, Docker, smoke test, troubleshooting): [docs/SETUP.md](docs/SETUP.md).
+### For the Jury
 
-## Rules (read before contributing - also for AI agents)
+1. Clone repository.
+2. Configure local `.env` using `.env.example`.
+3. Run `.\start-pitch.ps1`.
+4. Scan the generated QR code with a phone.
+5. Open the dispatcher URL on the laptop.
+6. Test the emergency voice flow (e.g. by saying the distress phrase).
+7. Observe the incident appearing in the dispatcher dashboard.
 
-- [AGENTS.md](AGENTS.md) - entry point for agents
-- [docs/SETUP.md](docs/SETUP.md) - setup, run, test
-- [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md)
-- [docs/agents/skills/secrets.md](docs/agents/skills/secrets.md) - never share secrets
-- [docs/agents/skills/api-contracts.md](docs/agents/skills/api-contracts.md) - contract-first API changes
-- [docs/agents/skills/workflow.md](docs/agents/skills/workflow.md) - git/branching/definition of done
+## Environment Configuration
+
+Guardian Agent requires a single `.env` file in the root directory.
+
+- `ELEVENLABS_API_KEY`
+- `ELEVENLABS_AGENT_ID`
+- `PORT`
+- `BACKEND_URL`
+- `CORS_ORIGIN`
+- `CORS_ORIGINS`
+- `APP_ENV`
+
+*Note: `.env` is local and never committed. `.env.example` contains placeholders. ElevenLabs credentials must be configured locally for the voice features to work.*
+
+## Development
+
+- **backend**: Python (FastAPI)
+- **BFF**: Node.js (Express, TypeScript)
+- **frontend**: React (Vite, TypeScript)
+- **Docker**: Supported via `docker-compose.yml` (`make up`).
+
+## Project Structure
+
+- `backend/` - Python API
+- `bff/` - Backend-for-Frontend (Node.js)
+- `frontend/` - React application
+- `docs/` - Documentation & architecture
+
+## Current Implementation Status
+
+### Implemented
+- AI Voice Agent integration (ElevenLabs).
+- Background keyword detection (Polish/English).
+- Alert dispatching to backend.
+- Real-time Dispatcher Dashboard with Incident Map.
+- Automated pitch environment (Cloudflare tunnel + QR).
+
+### Pitch Goal
+- Advanced reasoning for determining emergency severity dynamically.
+- Integration with real emergency services (e112).
+- Native iOS/Android apps (currently PWA/Web).
